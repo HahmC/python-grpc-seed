@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+service GrpcServer {
+    rpc CreateShape(ShapeType) returns (Shape) {}
+    rpc GetShape(ShapeId) returns (Shape) {}
+}
+
+message ShapeType {
+    str shape_type = 1;
+}
+
+message ShapeId {
+    int32 shape_id = 1;
+}
+
+message Shape {
+    int32 shape_id = 1;
+    str shape_type = 2;
+    repeated ShapeCoord coords = 3;
+}
+
+message ShapeCoord {
+    int32 x = 1;
+    int32 y = 2;
+}
