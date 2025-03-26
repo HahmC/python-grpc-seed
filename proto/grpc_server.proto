@@ -14,12 +14,12 @@ message ShapeId {
 }
 
 message Shape {
-    int32 shape_id = 1;
+    string shape_id = 1;
     string shape_type = 2;
     repeated ShapeCoord coords = 3;
 }
 
 message ShapeCoord {
-    int32 x = 1;
-    int32 y = 2;
+    optional int32 x = 1;
+    optional int32 y = 2;
 }

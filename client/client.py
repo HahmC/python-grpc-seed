@@ -38,7 +38,8 @@ def get_choice(logger, stub):
         get_choice(logger, stub)
 
 def create_shape(logger, stub):
-    response = stub.CreateShape(grpc_server.ShapeType(shape_type="Rectangle"))
+    response: grpc_server.Shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Rectangle"))
+    logger.info(f"Received response: {response}")
 
 if __name__ == "__main__":
     # Setup Configuration and Logging

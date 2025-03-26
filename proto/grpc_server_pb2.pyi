@@ -22,10 +22,10 @@ class Shape(_message.Message):
     SHAPE_ID_FIELD_NUMBER: _ClassVar[int]
     SHAPE_TYPE_FIELD_NUMBER: _ClassVar[int]
     COORDS_FIELD_NUMBER: _ClassVar[int]
-    shape_id: int
+    shape_id: str
     shape_type: str
     coords: _containers.RepeatedCompositeFieldContainer[ShapeCoord]
-    def __init__(self, shape_id: _Optional[int] = ..., shape_type: _Optional[str] = ..., coords: _Optional[_Iterable[_Union[ShapeCoord, _Mapping]]] = ...) -> None: ...
+    def __init__(self, shape_id: _Optional[str] = ..., shape_type: _Optional[str] = ..., coords: _Optional[_Iterable[_Union[ShapeCoord, _Mapping]]] = ...) -> None: ...
 
 class ShapeCoord(_message.Message):
     __slots__ = ("x", "y")
