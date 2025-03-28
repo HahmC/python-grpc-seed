@@ -10,7 +10,7 @@ message ShapeType {
 }
 
 message ShapeId {
-    int32 shape_id = 1;
+    string shape_id = 1;
 }
 
 message Shape {

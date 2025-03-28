@@ -1,9 +1,8 @@
-import array
 from typing import List
 
 import proto.grpc_server_pb2 as grpc_server
 
-def get_shape_json(shape: grpc_server.Shape) -> object:
+def get_json_from_shape(shape: grpc_server.Shape) -> object:
     """
     Takes a gRCP server Shape and returns a serializable object
 
@@ -16,7 +15,7 @@ def get_shape_json(shape: grpc_server.Shape) -> object:
         "coords": []
     }
 
-    json_coords: List[object] = array.array('i')
+    json_coords: List[object] = []
 
     for c in shape.coords:
         json_coords.append({

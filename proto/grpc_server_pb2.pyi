@@ -14,8 +14,8 @@ class ShapeType(_message.Message):
 class ShapeId(_message.Message):
     __slots__ = ("shape_id",)
     SHAPE_ID_FIELD_NUMBER: _ClassVar[int]
-    shape_id: int
-    def __init__(self, shape_id: _Optional[int] = ...) -> None: ...
+    shape_id: str
+    def __init__(self, shape_id: _Optional[str] = ...) -> None: ...
 
 class Shape(_message.Message):
     __slots__ = ("shape_id", "shape_type", "coords")

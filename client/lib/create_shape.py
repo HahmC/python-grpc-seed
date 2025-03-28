@@ -1,8 +1,10 @@
 import grpc
+from typing import List
 
 import proto.grpc_server_pb2 as grpc_server
+import proto.grpc_server_pb2_grpc as grpc_service
 
-def create_shape(methods, stub):
+def create_shape(methods: List[str], stub: grpc_service.GrpcServerStub):
     """
     Invokes the CreateShape gRPC method
 
@@ -10,14 +12,13 @@ def create_shape(methods, stub):
     :param stub: gRPC stub to invoke method
     :return: None
     """
-    from .get_method_choice import get_method_choice
 
     print('Which type of shape would you like to create:\n[T] - Triangle\n[R] - Rectangle\n[P] - Pentagon\n[X] - Return to main menu')
 
     shape_choice = input('Enter the shape you would like to create: ')
     shape_choice = shape_choice.upper()
 
-    shape: grpc_server.Shape = None
+    shape: grpc_server.Shape = grpc_server.Shape()
 
     try:
         if shape_choice == 'T':
@@ -29,13 +30,16 @@ def create_shape(methods, stub):
         elif shape_choice == 'X':
             print()
             print()
-            get_method_choice(methods, stub)
+            return
         else:
             print(f"{shape_choice} is an invalid shape. Please choose a valid shape.")
             print()
             create_shape(methods, stub)
 
-        print(f"You created a shape of type {shape.shape_type} and and id of {shape.shape_id}")
+        if shape.shape_id is '':
+            print("Shape was not created")
+        else:
+            print(f"You created a shape of type {shape.shape_type} and and id of {shape.shape_id}")
 
     except grpc.RpcError as e:
         print("Shape was not created")

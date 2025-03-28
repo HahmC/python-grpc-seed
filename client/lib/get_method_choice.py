@@ -1,5 +1,6 @@
 import lib.functions as helpers
 from .create_shape import create_shape
+from .get_shape import get_shape
 
 def get_method_choice(methods, stub):
     """
@@ -24,7 +25,10 @@ def get_method_choice(methods, stub):
         print("Welcome to CreateShape!")
         create_shape(methods, stub)
     elif fxn == 'G':
-        pass
+        print()
+        print()
+        print("Welcome to GetShape!")
+        get_shape(stub)
     elif fxn == 'E':
         exit()
     else:
