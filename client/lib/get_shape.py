@@ -44,7 +44,7 @@ def get_shape(stub: grpc_service.GrpcServerStub):
     shape_id = f"{shape_id[0].upper()}-{int(shape_id[2:])}"
 
     try:
-        shape = stub.GetShape(grpc_server.ShapeId(shape_id=shape_id))
+        shape = stub.GetShape(grpc_server.ShapeId(shape_id=shape_id), wait_for_ready=True)
 
         print("Shape Retrieved:")
         print(f"shape_id: {shape.shape_id}")

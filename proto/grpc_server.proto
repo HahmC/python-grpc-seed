@@ -23,3 +23,13 @@ message ShapeCoord {
     optional int32 x = 1;
     optional int32 y = 2;
 }
+
+Shape {
+    shape_id
+    shape_type
+    coords{
+    x, y
+    }
+    coords{x,y}
+
+}

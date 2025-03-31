@@ -1,5 +1,5 @@
 # Directories
 
 # Files
-**/*.json
+**/data.json
 .idea

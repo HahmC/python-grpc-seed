@@ -22,11 +22,11 @@ def create_shape(methods: List[str], stub: grpc_service.GrpcServerStub):
 
     try:
         if shape_choice == 'T':
-            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Triangle"))
+            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Triangle"), wait_for_ready=True)
         elif shape_choice == 'R':
-            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Rectangle"))
+            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Rectangle"), wait_for_ready=True)
         elif shape_choice == 'P':
-            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Pentagon"))
+            shape = stub.CreateShape(grpc_server.ShapeType(shape_type="Pentagon"), wait_for_ready=True)
         elif shape_choice == 'X':
             print()
             print()

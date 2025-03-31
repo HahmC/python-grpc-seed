@@ -1,0 +1,23 @@
+{
+      "methodConfig": [
+          {
+              "name": [
+                  {
+                      "service": "GrpcServer",
+                      "method": "CreateShape"
+                  },
+                  {
+                      "service": "GrpcServer",
+                      "method": "GetShape"
+                  }
+              ],
+              "retryPolicy": {
+                  "maxAttempts": 2,
+                  "initialBackoff": "0.1s",
+                  "maxBackoff": "2s",
+                  "backoffMultiplier": 2,
+                  "retryableStatusCodes": ["UNAVAILABLE", "DEADLINE_EXCEEDED"]
+              }
+          }
+      ]
+  }
