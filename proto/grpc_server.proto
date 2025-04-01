@@ -1,8 +1,19 @@
 syntax = "proto3";
 
 service GrpcServer {
-    rpc CreateShape(ShapeType) returns (Shape) {}
-    rpc GetShape(ShapeId) returns (Shape) {}
+    rpc CreateShape(ShapeType) returns (CreateShapeResponse) {}
+    rpc GetShape(ShapeId) returns (GetShapeResponse) {}
+}
+
+message CreateShapeResponse {
+    Code status_code = 1;
+    string message = 2;
+}
+
+message GetShapeResponse {
+    Code status_code = 1;
+    string message = 2;
+    Shape shape = 3;
 }
 
 message ShapeType {
@@ -24,12 +35,10 @@ message ShapeCoord {
     optional int32 y = 2;
 }
 
-Shape {
-    shape_id
-    shape_type
-    coords{
-    x, y
-    }
-    coords{x,y}
-
+// Start Custom Status Codes at 100 to not conflict with predefined gRPC status codes
+// Enum MUST start at 0 for proto to compile
+enum Code {
+    OK = 0;
+    INVALID_SHAPE = 100;
+    SHAPE_NOT_FOUND = 101;
 }

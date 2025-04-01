@@ -118,4 +118,4 @@ class GrpcServerServicer(grpc_service.GrpcServerServicer):
         if shape.shape_id is not '':
             return shape
         else:
-            context.abort(grpc.StatusCode.NOT_FOUND, f"shape_id {request.shape_id} not found in database")
+            context.abort(grpc_server.StatusCode.SHAPE_NOT_FOUND, f"shape_id {request.shape_id} not found in database")

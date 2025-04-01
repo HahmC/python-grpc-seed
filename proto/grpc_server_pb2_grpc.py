@@ -37,12 +37,12 @@ class GrpcServerStub(object):
         self.CreateShape = channel.unary_unary(
                 '/GrpcServer/CreateShape',
                 request_serializer=grpc__server__pb2.ShapeType.SerializeToString,
-                response_deserializer=grpc__server__pb2.Shape.FromString,
+                response_deserializer=grpc__server__pb2.CreateShapeResponse.FromString,
                 _registered_method=True)
         self.GetShape = channel.unary_unary(
                 '/GrpcServer/GetShape',
                 request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
-                response_deserializer=grpc__server__pb2.Shape.FromString,
+                response_deserializer=grpc__server__pb2.GetShapeResponse.FromString,
                 _registered_method=True)
 
 
@@ -67,12 +67,12 @@ def add_GrpcServerServicer_to_server(servicer, server):
             'CreateShape': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateShape,
                     request_deserializer=grpc__server__pb2.ShapeType.FromString,
-                    response_serializer=grpc__server__pb2.Shape.SerializeToString,
+                    response_serializer=grpc__server__pb2.CreateShapeResponse.SerializeToString,
             ),
             'GetShape': grpc.unary_unary_rpc_method_handler(
                     servicer.GetShape,
                     request_deserializer=grpc__server__pb2.ShapeId.FromString,
-                    response_serializer=grpc__server__pb2.Shape.SerializeToString,
+                    response_serializer=grpc__server__pb2.GetShapeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -101,7 +101,7 @@ class GrpcServer(object):
             target,
             '/GrpcServer/CreateShape',
             grpc__server__pb2.ShapeType.SerializeToString,
-            grpc__server__pb2.Shape.FromString,
+            grpc__server__pb2.CreateShapeResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -128,7 +128,7 @@ class GrpcServer(object):
             target,
             '/GrpcServer/GetShape',
             grpc__server__pb2.ShapeId.SerializeToString,
-            grpc__server__pb2.Shape.FromString,
+            grpc__server__pb2.GetShapeResponse.FromString,
             options,
             channel_credentials,
             insecure,
