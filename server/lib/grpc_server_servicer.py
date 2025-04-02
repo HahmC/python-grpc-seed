@@ -3,11 +3,11 @@ import json
 import grpc
 
 import lib.functions as helpers
-import proto.grpc_server_pb2 as grpc_server
-import proto.grpc_server_pb2_grpc as grpc_service
+import proto.grpc_server_pb2 as GrpcServer
+import proto.grpc_server_pb2_grpc as GrpcServerService
 from .logger import Logger
 
-class GrpcServerServicer(grpc_service.GrpcServerServicer):
+class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
     """
     GRPC Server Servicer - gRPC server serving all the methods defined in proto/grpc_server.proto
     """
@@ -28,51 +28,63 @@ class GrpcServerServicer(grpc_service.GrpcServerServicer):
         else:
             self.data = {"Triangles": [], "Rectangles": [], "Pentagons":[]}
 
-    def CreateShape(self, request: grpc_server.ShapeType, context) -> grpc_server.Shape:
+    def CreateShape(self, request: GrpcServer.ShapeType, context) -> GrpcServer.CreateShapeResponse:
         """
         Create the shape specified by the user, giving it an id and coordinates
 
         :param request: The type of shape to create
         :param context: context to support error codes
-        :return: The shape that was created
+        :return: CreateShapeResponse - pre-defined proto response to this method containing a status code, message
         """
         self.logger.info(f"CreateShape called with request: {request}")
 
-        # Initialize with generic shape
-        shape: grpc_server.Shape = grpc_server.Shape()
+        response: GrpcServer.CreateShapeResponse = GrpcServer.CreateShapeResponse(
+            status_code=GrpcServer.Code.OK,
+            message=""
+        )
 
         if request.shape_type == "Triangle":
             self.logger.info("Generating Triangle...")
 
             # Generate Triangle
-            shape = helpers.get_triangle(len(self.data["Triangles"]), self.max_width, self.max_height)
+            shape: GrpcServer.Shape = helpers.get_triangle(len(self.data["Triangles"]), self.max_width, self.max_height)
             shape_json: object = helpers.get_json_from_shape(shape)
             self.data["Triangles"].extend([shape_json])
 
             self.logger.info(f"Triangle: {shape}")
 
+            response.status_code = GrpcServer.Code.OK
+            response.message = f"Successfully Created Triangle: {shape_json}"
+
         elif request.shape_type == "Rectangle":
             self.logger.info("Generating Rectangle...")
 
             # Generate Rectangle
-            shape = helpers.get_rectangle(len(self.data["Rectangles"]), self.max_width, self.max_height)
+            shape: GrpcServer.Shape = helpers.get_rectangle(len(self.data["Rectangles"]), self.max_width, self.max_height)
             shape_json: object = helpers.get_json_from_shape(shape)
             self.data["Rectangles"].extend([shape_json])
 
             self.logger.info(f"Rectangle: {shape}")
 
+            response.status_code = GrpcServer.Code.OK
+            response.message = f"Successfully Created Rectangle: {shape_json}"
+
         elif request.shape_type == "Pentagon":
             self.logger.info("Generating Pentagon...")
 
             # Generate Pentagon
-            shape = helpers.get_pentagon(len(self.data["Pentagons"]), self.max_width, self.max_height)
+            shape: GrpcServer.Shape = helpers.get_pentagon(len(self.data["Pentagons"]), self.max_width, self.max_height)
             shape_json: object = helpers.get_json_from_shape(shape)
             self.data["Pentagons"].extend([shape_json])
 
             self.logger.info(f"Pentagon: {shape}")
 
+            response.status_code = GrpcServer.Code.OK
+            response.message = f"Successfully Created Pentagon: {shape_json}"
+
         else:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"shape_type {request.shape_type} is not supported at this time")
+            response.status_code = GrpcServer.Code.INVALID_SHAPE
+            response.message = f"shape_type {request.shape_type} is not supported at this time"
 
         # Write data back to db file
         try:
@@ -82,40 +94,59 @@ class GrpcServerServicer(grpc_service.GrpcServerServicer):
         except IOError as e:
             self.logger.error(f"Error writing to file: {e}")
 
-        return shape
+        return response
 
-    def GetShape(self, request: grpc_server.ShapeId, context) -> grpc_server.Shape:
+    def GetShape(self, request: GrpcServer.ShapeId, context) -> GrpcServer.GetShapeResponse:
         """
         Retrieves the requested shape from the database using the shape_id and returns it to the user if present,
         otherwise throws
 
         :param request: gRPC Request containing the id to lookup
         :param context:
-        :return: Shape corresponding to the ID requested by the user
+        :return: GetShapeResponse - pre-defined proto response to this method containing a status code, message, and shape
+                 if a shape was found
         """
         self.logger.info(f"GetShape called with request: {request}")
 
         shape_id: str = f"{request.shape_id[0].upper()}{request.shape_id[1:]}" # Reformat shape_id
 
-        shape: grpc_server.Shape = grpc_server.Shape()
+        response: GrpcServer.GetShapeResponse = GrpcServer.GetShapeResponse(
+            status_code=GrpcServer.Code.OK,
+            message=""
+        )
+
+        shape: GrpcServer.Shape = None
 
         # Iterate through database looking for the given shape id
         if shape_id[0] == "T":
             for t in self.data["Triangles"]:
                 if t['shape_id'] == shape_id:
-                    shape = helpers.get_shape_from_json(t)
+                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
+                    break
+
         elif shape_id[0] == "R":
             for t in self.data["Rectangles"]:
                 if t['shape_id'] == shape_id:
-                    shape = helpers.get_shape_from_json(t)
+                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
+                    break
+
         elif shape_id[0] == "P":
             for t in self.data["Pentagons"]:
                 if t['shape_id'] == shape_id:
-                    shape = helpers.get_shape_from_json(t)
-        else:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"shape_id {request.shape_id} is not a valid shape_id")
+                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
+                    break
 
-        if shape.shape_id is not '':
-            return shape
         else:
-            context.abort(grpc_server.StatusCode.SHAPE_NOT_FOUND, f"shape_id {request.shape_id} not found in database")
+            response.status_code = GrpcServer.Code.INVALID_SHAPE
+            response.message = f"shape_id {request.shape_id} is not a valid shape_id"
+
+        if shape:
+            response.status_code = GrpcServer.Code.OK
+            response.message = f"Successfully retrieved {shape_id}"
+            response.shape.CopyFrom(shape)
+
+        else:
+            response.status_code = GrpcServer.Code.SHAPE_NOT_FOUND
+            response.message = f"shape_id {request.shape_id} not found in database"
+
+        return response

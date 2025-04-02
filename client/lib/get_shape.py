@@ -1,9 +1,9 @@
 import grpc
 
-import proto.grpc_server_pb2 as grpc_server
-import proto.grpc_server_pb2_grpc as grpc_service
+import proto.grpc_server_pb2 as GrpcServer
+import proto.grpc_server_pb2_grpc as GrpcService
 
-def get_shape(stub: grpc_service.GrpcServerStub):
+def get_shape(stub: GrpcService.GrpcServerStub):
     """
     Invoces the GetShape gRPC method
     
@@ -44,18 +44,27 @@ def get_shape(stub: grpc_service.GrpcServerStub):
     shape_id = f"{shape_id[0].upper()}-{int(shape_id[2:])}"
 
     try:
-        shape = stub.GetShape(grpc_server.ShapeId(shape_id=shape_id), wait_for_ready=True)
+        response: GrpcServer.GetShapeResponse = stub.GetShape(GrpcServer.ShapeId(shape_id=shape_id), wait_for_ready=True)
 
-        print("Shape Retrieved:")
-        print(f"shape_id: {shape.shape_id}")
-        print(f"shape_type: {shape.shape_type}")
-        print("coords: [")
+        print(f"StatusCode.{GrpcServer.Code.Name(response.status_code)} - {response.message}")
 
-        for c in shape.coords:
-            coord_string = "{" + f"x: {c.x}, y: {c.y}" + "}"
-            print(coord_string)
+        if response.status_code == GrpcServer.Code.OK:
+            print(f"shape_id: {response.shape.shape_id}")
+            print(f"shape_type: {response.shape.shape_type}")
+            print("coords: [")
 
-        print("]")
+            for c in response.shape.coords:
+                coord_string = "{" + f"x: {c.x}, y: {c.y}" + "}"
+                print(coord_string)
+
+            print("]")
+
+        # If a shape is not found, prompt the user for a different shape_id to lookup
+        elif response.status_code == GrpcServer.Code.SHAPE_NOT_FOUND:
+            print()
+            print()
+            get_shape(stub)
+
 
     except grpc.RpcError as e:
         print("Shape was not retrieved")

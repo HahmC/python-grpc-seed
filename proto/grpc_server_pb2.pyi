@@ -10,9 +10,11 @@ class Code(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     OK: _ClassVar[Code]
     INVALID_SHAPE: _ClassVar[Code]
+    INVALID_SHAPE_ID: _ClassVar[Code]
     SHAPE_NOT_FOUND: _ClassVar[Code]
 OK: Code
 INVALID_SHAPE: Code
+INVALID_SHAPE_ID: Code
 SHAPE_NOT_FOUND: Code
 
 class CreateShapeResponse(_message.Message):

@@ -13,7 +13,7 @@ message CreateShapeResponse {
 message GetShapeResponse {
     Code status_code = 1;
     string message = 2;
-    Shape shape = 3;
+    optional Shape shape = 3;
 }
 
 message ShapeType {
@@ -40,5 +40,6 @@ message ShapeCoord {
 enum Code {
     OK = 0;
     INVALID_SHAPE = 100;
-    SHAPE_NOT_FOUND = 101;
+    INVALID_SHAPE_ID = 101;
+    SHAPE_NOT_FOUND = 102;
 }

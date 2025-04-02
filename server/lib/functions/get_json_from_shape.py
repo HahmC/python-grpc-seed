@@ -1,8 +1,8 @@
 from typing import List
 
-import proto.grpc_server_pb2 as grpc_server
+import proto.grpc_server_pb2 as GrpcServer
 
-def get_json_from_shape(shape: grpc_server.Shape) -> object:
+def get_json_from_shape(shape: GrpcServer.Shape) -> object:
     """
     Takes a gRCP server Shape and returns a serializable object
 

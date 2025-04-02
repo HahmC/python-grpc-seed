@@ -3,7 +3,7 @@ import json
 
 from lib.logger import Logger
 import lib.functions as helpers
-import proto.grpc_server_pb2_grpc as grpc_service
+import proto.grpc_server_pb2_grpc as GrpcService
 from lib.get_method_choice import get_method_choice
 
 def main(logger, config, methods):
@@ -19,7 +19,7 @@ def main(logger, config, methods):
         ]
     )
 
-    stub = grpc_service.GrpcServerStub(channel)
+    stub = GrpcService.GrpcServerStub(channel)
 
     # Create Console App
     app(methods, stub)
