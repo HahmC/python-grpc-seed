@@ -3,7 +3,7 @@ import json
 
 from lib.logger import Logger
 import lib.functions as helpers
-import proto.grpc_server_pb2_grpc as GrpcService
+import grpc_server_pb2_grpc as GrpcService
 from lib.get_method_choice import get_method_choice
 
 def main(logger, config, methods):
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     client_logger = Logger(client_config)
     helpers.log_config(client_logger, client_config)
 
-    client_methods = [client_config['gRPC_methods'][key] for key in client_config['gRPC_methods']]
+    # client_methods = [client_config['gRPC_methods'][key] for key in client_config['gRPC_methods']]
 
     # Start App
-    main(client_logger, client_config, client_methods)
+    main(client_logger, client_config, client_config['gRPC_methods'])

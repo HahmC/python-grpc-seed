@@ -10,10 +10,12 @@ class Code(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     OK: _ClassVar[Code]
     INVALID_SHAPE: _ClassVar[Code]
+    INVALID_PERIMETER: _ClassVar[Code]
     INVALID_SHAPE_ID: _ClassVar[Code]
     SHAPE_NOT_FOUND: _ClassVar[Code]
 OK: Code
 INVALID_SHAPE: Code
+INVALID_PERIMETER: Code
 INVALID_SHAPE_ID: Code
 SHAPE_NOT_FOUND: Code
 
@@ -34,6 +36,22 @@ class GetShapeResponse(_message.Message):
     message: str
     shape: Shape
     def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
+
+class GetPerimetersGreaterThanResponse(_message.Message):
+    __slots__ = ("status_code", "message", "shape")
+    STATUS_CODE_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    SHAPE_FIELD_NUMBER: _ClassVar[int]
+    status_code: Code
+    message: str
+    shape: Shape
+    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
+
+class MinPerimeter(_message.Message):
+    __slots__ = ("min_perimeter",)
+    MIN_PERIMETER_FIELD_NUMBER: _ClassVar[int]
+    min_perimeter: float
+    def __init__(self, min_perimeter: _Optional[float] = ...) -> None: ...
 
 class ShapeType(_message.Message):
     __slots__ = ("shape_type",)

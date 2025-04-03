@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import proto.grpc_server_pb2 as grpc__server__pb2
+import grpc_server_pb2 as grpc__server__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -44,6 +44,11 @@ class GrpcServerStub(object):
                 request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
                 response_deserializer=grpc__server__pb2.GetShapeResponse.FromString,
                 _registered_method=True)
+        self.GetPerimetersGreaterThan = channel.unary_stream(
+                '/GrpcServer/GetPerimetersGreaterThan',
+                request_serializer=grpc__server__pb2.MinPerimeter.SerializeToString,
+                response_deserializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
+                _registered_method=True)
 
 
 class GrpcServerServicer(object):
@@ -61,6 +66,12 @@ class GrpcServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetPerimetersGreaterThan(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GrpcServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +84,11 @@ def add_GrpcServerServicer_to_server(servicer, server):
                     servicer.GetShape,
                     request_deserializer=grpc__server__pb2.ShapeId.FromString,
                     response_serializer=grpc__server__pb2.GetShapeResponse.SerializeToString,
+            ),
+            'GetPerimetersGreaterThan': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetPerimetersGreaterThan,
+                    request_deserializer=grpc__server__pb2.MinPerimeter.FromString,
+                    response_serializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +145,33 @@ class GrpcServer(object):
             '/GrpcServer/GetShape',
             grpc__server__pb2.ShapeId.SerializeToString,
             grpc__server__pb2.GetShapeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPerimetersGreaterThan(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/GrpcServer/GetPerimetersGreaterThan',
+            grpc__server__pb2.MinPerimeter.SerializeToString,
+            grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
             options,
             channel_credentials,
             insecure,

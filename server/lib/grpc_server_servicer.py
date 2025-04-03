@@ -1,10 +1,11 @@
 import os
 import json
-import grpc
+import time
+from typing import Iterator
 
 import lib.functions as helpers
-import proto.grpc_server_pb2 as GrpcServer
-import proto.grpc_server_pb2_grpc as GrpcServerService
+import grpc_server_pb2 as GrpcServer
+import grpc_server_pb2_grpc as GrpcServerService
 from .logger import Logger
 
 class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
@@ -48,7 +49,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             # Generate Triangle
             shape: GrpcServer.Shape = helpers.get_triangle(len(self.data["Triangles"]), self.max_width, self.max_height)
-            shape_json: object = helpers.get_json_from_shape(shape)
+            shape_json: dict = helpers.get_json_from_shape(shape)
             self.data["Triangles"].extend([shape_json])
 
             self.logger.info(f"Triangle: {shape}")
@@ -61,7 +62,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             # Generate Rectangle
             shape: GrpcServer.Shape = helpers.get_rectangle(len(self.data["Rectangles"]), self.max_width, self.max_height)
-            shape_json: object = helpers.get_json_from_shape(shape)
+            shape_json: dict = helpers.get_json_from_shape(shape)
             self.data["Rectangles"].extend([shape_json])
 
             self.logger.info(f"Rectangle: {shape}")
@@ -74,7 +75,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             # Generate Pentagon
             shape: GrpcServer.Shape = helpers.get_pentagon(len(self.data["Pentagons"]), self.max_width, self.max_height)
-            shape_json: object = helpers.get_json_from_shape(shape)
+            shape_json: dict = helpers.get_json_from_shape(shape)
             self.data["Pentagons"].extend([shape_json])
 
             self.logger.info(f"Pentagon: {shape}")
@@ -150,3 +151,49 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
             response.message = f"shape_id {request.shape_id} not found in database"
 
         return response
+
+    def GetPerimetersGreaterThan(self, request: GrpcServer.MinPerimeter, context) -> Iterator[GrpcServer.GetPerimetersGreaterThanResponse]:
+        """
+        Retrieves all the shapes with a perimeter greater than the specified value and returns them to the user
+
+        :param request: minimum perimeter value
+        :param context:
+        :return: iterable object of all the shapes with a perimeter greater than the provided value
+        """
+
+        if request.min_perimeter < 0:
+            yield GrpcServer.GetPerimetersGreaterThanResponse(
+                status_code=GrpcServer.Code.INVALID_PERIMETER,
+                message=f"{request.min_perimeter} is an invalid perimeter value. Perimeters must be greater than or equal to 0"
+            )
+
+            return
+
+        found_shape: bool = False
+
+        for shape_type in self.data:
+            self.logger.info(f"Calculating perimeters of {shape_type}.....")
+
+            for s in self.data[shape_type]:
+                shape: GrpcServer.Shape = helpers.get_shape_from_json(s)
+                perimeter: float = helpers.get_perimeter(shape)
+
+                self.logger.info(f"{shape.shape_id} - P={round(perimeter, 2)} units")
+
+                if perimeter > request.min_perimeter:
+                    found_shape = True
+
+                    yield GrpcServer.GetPerimetersGreaterThanResponse(
+                        status_code=GrpcServer.Code.OK,
+                        message=f"{shape.shape_id} has a perimeter of {round(perimeter, 2)} units",
+                        shape=shape
+                    )
+
+                    time.sleep(1) # Added delay to visually see that the results are returned to the user as they become available
+
+        # If no shapes found with perimeter greater than the specified minimum
+        if not found_shape:
+            yield GrpcServer.GetPerimetersGreaterThanResponse(
+                status_code=GrpcServer.Code.SHAPE_NOT_FOUND,
+                message=f"No shapes found with perimeter greater than {request.min_perimeter}."
+            )

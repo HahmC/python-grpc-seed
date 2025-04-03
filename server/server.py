@@ -4,7 +4,7 @@ from concurrent import futures
 
 from lib.logger import Logger
 import lib.functions as helpers
-import proto.grpc_server_pb2_grpc as GrpcServer
+import grpc_server_pb2_grpc as GrpcServer
 from lib.grpc_server_servicer import GrpcServerServicer
 
 async def serve(logger, config):

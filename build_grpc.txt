@@ -1,2 +1,8 @@
--- Compile .proto files in the current directory using the gRPC Python compiler
+-- Compile .proto files in the current directory, outputting them into the proto directory using the gRPC Python compiler
 python -m grpc_tools.protoc -I./proto --python_out=./proto --pyi_out=./proto --grpc_python_out=./proto ./proto/*.proto
+
+-- Compile .proto files in the current directory, outputting them into the client directory using the gRPC Python compiler
+python -m grpc_tools.protoc -I./client --python_out=./client --pyi_out=./client --grpc_python_out=./proto ./proto/*.proto
+
+-- Compile .proto files in the current directory, outputting them into the server directory using the gRPC Python compiler
+python -m grpc_tools.protoc -I./proto --python_out=./server --pyi_out=./server --grpc_python_out=./server ./proto/*.proto

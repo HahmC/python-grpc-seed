@@ -1,8 +1,8 @@
 from typing import List
 
-import proto.grpc_server_pb2 as GrpcServer
+import grpc_server_pb2 as GrpcServer
 
-def get_shape_from_json(json_shape: object) -> GrpcServer.Shape:
+def get_shape_from_json(json_shape: dict) -> GrpcServer.Shape:
     """
     Takes a JSON object and converts it back to a gRPC Shape
 

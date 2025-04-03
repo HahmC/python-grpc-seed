@@ -1,6 +1,7 @@
 import lib.functions as helpers
 from .create_shape import create_shape
 from .get_shape import get_shape
+from .get_perimeters_greater_than import get_perimeters_greater_than
 
 def get_method_choice(methods, stub):
     """
@@ -29,6 +30,11 @@ def get_method_choice(methods, stub):
         print()
         print("Welcome to GetShape!")
         get_shape(stub)
+    elif fxn == 'P':
+        print()
+        print()
+        print("Welcome to GetPerimetersGreaterThan!")
+        get_perimeters_greater_than(stub)
     elif fxn == 'E':
         exit()
     else:

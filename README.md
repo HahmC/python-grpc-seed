@@ -11,7 +11,7 @@ and message definitions used in this project.
 
 The way this repository is constructed, once the gRPC python files have been generated, you must go
 into the `SERVICE_NAME_pb2_grpc.py` module and update the import of the `SERVICE_NAME_pb2.py` module
-to be `proto.SERVICE_NAME_pb2.py` so that the imports work properly when used in the `server` and `client` packages
+to be `SERVICE_NAME_pb2.py` so that the imports work properly when used in the `server` and `client` packages
 
 ## Server
 The `server` package contains `server.py`, the module specifying the creation of an asynchronous

@@ -1,7 +1,7 @@
 import random
 from typing import List
 
-import proto.grpc_server_pb2 as GrpcServer
+import grpc_server_pb2 as GrpcServer
 
 def get_rectangle(rectangle_id, max_width, max_height) -> GrpcServer.Shape:
     """

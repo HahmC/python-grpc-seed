@@ -14,7 +14,7 @@ def get_methods(methods) -> str:
     method_string: str = ''
 
     for m in methods:
-        method_string += f"\n[{m[0].upper()}] - {m} "
+        method_string += f"\n[{m.upper()}] - {methods[m]} "
 
     method_string = method_string.rstrip()
 

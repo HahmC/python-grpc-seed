@@ -1,7 +1,7 @@
 import grpc
 
-import proto.grpc_server_pb2 as GrpcServer
-import proto.grpc_server_pb2_grpc as GrpcService
+import grpc_server_pb2 as GrpcServer
+import grpc_server_pb2_grpc as GrpcService
 
 def get_shape(stub: GrpcService.GrpcServerStub):
     """
@@ -32,13 +32,13 @@ def get_shape(stub: GrpcService.GrpcServerStub):
     except ValueError:
         print(f"{shape_id} is not a valid shape_id")
         print()
-        get_shape(stub)
+        return
 
     # Validate shape_id format
     if shape_id[1] is not '-' or int(shape_id[2:]) < 0:
         print(f"{shape_id} is not a valid shape_id")
         print()
-        get_shape(stub)
+        return
 
     # Reformat shape_id into what the server expects
     shape_id = f"{shape_id[0].upper()}-{int(shape_id[2:])}"
@@ -61,9 +61,10 @@ def get_shape(stub: GrpcService.GrpcServerStub):
 
         # If a shape is not found, prompt the user for a different shape_id to lookup
         elif response.status_code == GrpcServer.Code.SHAPE_NOT_FOUND:
+            print(f"StatusCode.{GrpcServer.Code.Name(response.status_code)} - {response.message}")
             print()
             print()
-            get_shape(stub)
+            return
 
 
     except grpc.RpcError as e:
@@ -72,4 +73,4 @@ def get_shape(stub: GrpcService.GrpcServerStub):
 
         print()
         print()
-        get_shape(stub)
+        return
