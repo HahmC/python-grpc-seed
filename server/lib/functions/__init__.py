@@ -1,3 +1,4 @@
+from .get_area import *
 from .get_config import *
 from .log_config import *
 from .get_triangle import *

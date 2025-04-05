@@ -2,6 +2,8 @@ import lib.functions as helpers
 from .create_shape import create_shape
 from .get_shape import get_shape
 from .get_perimeters_greater_than import get_perimeters_greater_than
+from .get_total_area import get_total_area
+from .get_areas import get_areas
 
 def get_method_choice(methods, stub):
     """
@@ -35,6 +37,16 @@ def get_method_choice(methods, stub):
         print()
         print("Welcome to GetPerimetersGreaterThan!")
         get_perimeters_greater_than(stub)
+    elif fxn == 'T':
+        print()
+        print()
+        print("Welcome to GetTotalArea!")
+        get_total_area(stub)
+    elif fxn == 'A':
+        print()
+        print()
+        print("Welcome to GetAreas!")
+        get_areas(stub)
     elif fxn == 'E':
         exit()
     else:

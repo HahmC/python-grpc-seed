@@ -13,19 +13,23 @@ class Code(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     INVALID_PERIMETER: _ClassVar[Code]
     INVALID_SHAPE_ID: _ClassVar[Code]
     SHAPE_NOT_FOUND: _ClassVar[Code]
+    AREA_NOT_FOUND: _ClassVar[Code]
 OK: Code
 INVALID_SHAPE: Code
 INVALID_PERIMETER: Code
 INVALID_SHAPE_ID: Code
 SHAPE_NOT_FOUND: Code
+AREA_NOT_FOUND: Code
 
 class CreateShapeResponse(_message.Message):
-    __slots__ = ("status_code", "message")
+    __slots__ = ("status_code", "message", "shape")
     STATUS_CODE_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    SHAPE_FIELD_NUMBER: _ClassVar[int]
     status_code: Code
     message: str
-    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ...) -> None: ...
+    shape: Shape
+    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
 
 class GetShapeResponse(_message.Message):
     __slots__ = ("status_code", "message", "shape")
@@ -38,14 +42,42 @@ class GetShapeResponse(_message.Message):
     def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
 
 class GetPerimetersGreaterThanResponse(_message.Message):
-    __slots__ = ("status_code", "message", "shape")
+    __slots__ = ("status_code", "message", "perimeter", "shape")
     STATUS_CODE_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    PERIMETER_FIELD_NUMBER: _ClassVar[int]
     SHAPE_FIELD_NUMBER: _ClassVar[int]
     status_code: Code
     message: str
+    perimeter: float
     shape: Shape
-    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
+    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., perimeter: _Optional[float] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
+
+class GetTotalAreaResponse(_message.Message):
+    __slots__ = ("status_code", "message", "total_area", "valid_ids", "invalid_ids")
+    STATUS_CODE_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_AREA_FIELD_NUMBER: _ClassVar[int]
+    VALID_IDS_FIELD_NUMBER: _ClassVar[int]
+    INVALID_IDS_FIELD_NUMBER: _ClassVar[int]
+    status_code: Code
+    message: str
+    total_area: float
+    valid_ids: _containers.RepeatedCompositeFieldContainer[ShapeId]
+    invalid_ids: _containers.RepeatedCompositeFieldContainer[ShapeId]
+    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., total_area: _Optional[float] = ..., valid_ids: _Optional[_Iterable[_Union[ShapeId, _Mapping]]] = ..., invalid_ids: _Optional[_Iterable[_Union[ShapeId, _Mapping]]] = ...) -> None: ...
+
+class GetAreasResponse(_message.Message):
+    __slots__ = ("status_code", "message", "area", "shape")
+    STATUS_CODE_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    AREA_FIELD_NUMBER: _ClassVar[int]
+    SHAPE_FIELD_NUMBER: _ClassVar[int]
+    status_code: Code
+    message: str
+    area: float
+    shape: Shape
+    def __init__(self, status_code: _Optional[_Union[Code, str]] = ..., message: _Optional[str] = ..., area: _Optional[float] = ..., shape: _Optional[_Union[Shape, _Mapping]] = ...) -> None: ...
 
 class MinPerimeter(_message.Message):
     __slots__ = ("min_perimeter",)

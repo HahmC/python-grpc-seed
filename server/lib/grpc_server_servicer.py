@@ -1,7 +1,7 @@
 import os
 import json
 import time
-from typing import Iterator
+from typing import Iterator, List
 
 import lib.functions as helpers
 import grpc_server_pb2 as GrpcServer
@@ -56,6 +56,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             response.status_code = GrpcServer.Code.OK
             response.message = f"Successfully Created Triangle: {shape_json}"
+            response.shape.CopyFrom(shape)
 
         elif request.shape_type == "Rectangle":
             self.logger.info("Generating Rectangle...")
@@ -69,6 +70,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             response.status_code = GrpcServer.Code.OK
             response.message = f"Successfully Created Rectangle: {shape_json}"
+            response.shape.CopyFrom(shape)
 
         elif request.shape_type == "Pentagon":
             self.logger.info("Generating Pentagon...")
@@ -82,6 +84,7 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             response.status_code = GrpcServer.Code.OK
             response.message = f"Successfully Created Pentagon: {shape_json}"
+            response.shape.CopyFrom(shape)
 
         else:
             response.status_code = GrpcServer.Code.INVALID_SHAPE
@@ -109,46 +112,29 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
         """
         self.logger.info(f"GetShape called with request: {request}")
 
-        shape_id: str = f"{request.shape_id[0].upper()}{request.shape_id[1:]}" # Reformat shape_id
-
         response: GrpcServer.GetShapeResponse = GrpcServer.GetShapeResponse(
             status_code=GrpcServer.Code.OK,
             message=""
         )
 
-        shape: GrpcServer.Shape = None
+        try:
+            # Attempt to locate the given shape_id, if not found, GrpcServer.Code statuses are used to record
+            # the appropriate error
+            shape: GrpcServer.Shape = self.__get_shape_from_id(request.shape_id, self.data)
 
-        # Iterate through database looking for the given shape id
-        if shape_id[0] == "T":
-            for t in self.data["Triangles"]:
-                if t['shape_id'] == shape_id:
-                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
-                    break
-
-        elif shape_id[0] == "R":
-            for t in self.data["Rectangles"]:
-                if t['shape_id'] == shape_id:
-                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
-                    break
-
-        elif shape_id[0] == "P":
-            for t in self.data["Pentagons"]:
-                if t['shape_id'] == shape_id:
-                    shape: GrpcServer.Shape = helpers.get_shape_from_json(t)
-                    break
-
-        else:
-            response.status_code = GrpcServer.Code.INVALID_SHAPE
-            response.message = f"shape_id {request.shape_id} is not a valid shape_id"
-
-        if shape:
             response.status_code = GrpcServer.Code.OK
-            response.message = f"Successfully retrieved {shape_id}"
+            response.message = f"Successfully retrieved {request.shape_id}"
             response.shape.CopyFrom(shape)
 
-        else:
-            response.status_code = GrpcServer.Code.SHAPE_NOT_FOUND
-            response.message = f"shape_id {request.shape_id} not found in database"
+        except LookupError as error:
+
+            if int(str(error)) == GrpcServer.Code.INVALID_SHAPE:
+                response.status_code = GrpcServer.Code.INVALID_SHAPE
+                response.message = f"shape_id {request.shape_id} is not a valid shape_id"
+
+            elif int(str(error)) == GrpcServer.Code.SHAPE_NOT_FOUND:
+                response.status_code = GrpcServer.Code.SHAPE_NOT_FOUND
+                response.message = f"shape_id {request.shape_id} not found in database"
 
         return response
 
@@ -160,6 +146,8 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
         :param context:
         :return: iterable object of all the shapes with a perimeter greater than the provided value
         """
+
+        self.logger.info(f"GetPerimetersGreaterThan called with {request}")
 
         if request.min_perimeter < 0:
             yield GrpcServer.GetPerimetersGreaterThanResponse(
@@ -176,16 +164,17 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
 
             for s in self.data[shape_type]:
                 shape: GrpcServer.Shape = helpers.get_shape_from_json(s)
-                perimeter: float = helpers.get_perimeter(shape)
+                perimeter: float = round(helpers.get_perimeter(shape), 2)
 
-                self.logger.info(f"{shape.shape_id} - P={round(perimeter, 2)} units")
+                self.logger.info(f"{shape.shape_id} - P={perimeter} units")
 
                 if perimeter > request.min_perimeter:
                     found_shape = True
 
                     yield GrpcServer.GetPerimetersGreaterThanResponse(
                         status_code=GrpcServer.Code.OK,
-                        message=f"{shape.shape_id} has a perimeter of {round(perimeter, 2)} units",
+                        message=f"{shape.shape_id} has a perimeter of {perimeter} units",
+                        perimeter=perimeter,
                         shape=shape
                     )
 
@@ -197,3 +186,125 @@ class GrpcServerServicer(GrpcServerService.GrpcServerServicer):
                 status_code=GrpcServer.Code.SHAPE_NOT_FOUND,
                 message=f"No shapes found with perimeter greater than {request.min_perimeter}."
             )
+
+    def GetTotalArea(self, request: Iterator[GrpcServer.ShapeId], context) -> GrpcServer.GetTotalAreaResponse:
+        """
+        Given a list of shape_id, calculate and add up all the areas of all the existing shapes provided, and note which
+        of the shape_ids requested do not exist
+
+        :param request: List of shape_ids to sum the areas of
+        :param context:
+        :return: GrpcServer.GetTotalAreaResponse - the total area of all the existing shape_ids provided
+        """
+
+        self.logger.info(f"GetTotalArea called with a GrpcServer.ShapeId iterator")
+
+        total_area: float = 0.0
+        invalid_ids: List[GrpcServer.ShapeId] = []
+        valid_ids: List[GrpcServer.ShapeId] = []
+
+        response: GrpcServer.GetTotalAreaResponse = GrpcServer.GetTotalAreaResponse(
+            status_code=GrpcServer.Code.OK,
+            message=""
+        )
+
+        for shape_id in request:
+            try:
+                # Attempt to locate the given shape_id, if not found, GrpcServer.Code statuses are used to record
+                # the appropriate error
+                shape: GrpcServer.Shape = self.__get_shape_from_id(shape_id.shape_id)
+                area = helpers.get_area(shape)
+
+                total_area += area
+                valid_ids.append(shape_id)
+
+                self.logger.info(f"{shape_id.shape_id}: A={area} square units")
+            except LookupError as error:
+                self.logger.error(f"{shape_id.shape_id} not in database")
+                if int(str(error)) == GrpcServer.Code.INVALID_SHAPE or int(str(error)) == GrpcServer.Code.SHAPE_NOT_FOUND:
+                    invalid_ids.append(shape_id)
+
+            self.logger.info(f"Total area at {total_area} square units")
+
+        if total_area > 0:
+            response.status_code = GrpcServer.Code.OK
+            response.message = f"Total area of shapes {total_area} square units."
+            response.total_area = total_area
+            response.valid_ids.extend(valid_ids)
+            response.invalid_ids.extend(invalid_ids)
+        else:
+            response.status_code = GrpcServer.Code.AREA_NOT_FOUND
+            response.message = f"Invalid Area: {total_area}."
+            response.invalid_ids.extend(invalid_ids)
+
+        return response
+
+    def GetAreas(self, request: Iterator[GrpcServer.ShapeId], context) -> Iterator[GrpcServer.GetAreasResponse]:
+        """
+        Given an iterator of shape_ids, return an iterator of the corresponding shape and it's area
+
+        :param request: iterator of shape_ids
+        :return: Iterator[GrpcServer.GetAreasResponse]
+        """
+
+        self.logger.info('GetAreas called with GrpcServer.ShapeId iterator')
+
+        for shape_id in request:
+            response: GrpcServer.GetAreasResponse = GrpcServer.GetAreasResponse(
+                status_code=GrpcServer.Code.OK,
+                message=""
+            )
+
+            try:
+                # Attempt to locate the given shape_id, if not found, GrpcServer.Code statuses are used to record
+                # the appropriate error
+                shape: GrpcServer.Shape = self.__get_shape_from_id(shape_id.shape_id)
+                area = helpers.get_area(shape)
+
+                response.status_code = GrpcServer.Code.OK
+                response.message = f"{shape.shape_id}: A={area} square units"
+                response.area = area
+                response.shape.CopyFrom(shape)
+
+                self.logger.info(f"{shape_id.shape_id}: A={area} square units")
+            except LookupError as error:
+                self.logger.error(f"{shape_id.shape_id} not in database")
+                if int(str(error)) == GrpcServer.Code.INVALID_SHAPE or int(str(error)) == GrpcServer.Code.SHAPE_NOT_FOUND:
+                    response.status_code = GrpcServer.Code.AREA_NOT_FOUND
+                    response.message = f"{shape_id.shape_id} does not exist"
+
+            yield response
+
+            time.sleep(1)
+
+    def __get_shape_from_id(self, shape_id: str) -> GrpcServer.Shape:
+        """
+        Provided a shape_id attempt to locate it in the database, otherwise throw a LookupError with the appropriate
+        GrpcServer.Code status code to indicate why the shape was not found
+
+        :param shape_id: shape to lookup
+        :return: GrpcServer.Shape
+        """
+        shape: GrpcServer.Shape = None
+
+        shape_id: str = f"{shape_id[0].upper()}{shape_id[1:]}"  # Reformat shape_id
+        shape_key: str = ""
+
+        # Iterate over database trying to match the shape_type of the id to a shape_type in the database
+        for key in self.data:
+            if key[0] == shape_id[0]:
+                shape_key = key
+
+        if shape_key == "":
+            raise LookupError(f"{GrpcServer.Code.INVALID_SHAPE}")
+
+        # Once the proper shape_type has been identified, search for the shape_id in that list of shapes
+        for s in self.data[shape_key]:
+            if s['shape_id'] == shape_id:
+                shape = helpers.get_shape_from_json(s)
+
+        # Raise LookupError if a shape is not found in the database
+        if shape is None:
+            raise LookupError(f"{GrpcServer.Code.SHAPE_NOT_FOUND}")
+
+        return shape

@@ -46,12 +46,6 @@ def get_perimeters_greater_than(stub: GrpcService.GrpcServerStub):
             if r.status_code == GrpcServer.Code.OK:
                 shapes.append(r.shape)
 
-            # If an invalid perimeter option was passed to the server, allow the user to correct the input value
-            elif r.status_code == GrpcServer.Code.INVALID_PERIMETER:
-                print()
-                print()
-                get_perimeters_greater_than(stub)
-
 
     except grpc.RpcError as e:
         print("Shape was not retrieved")

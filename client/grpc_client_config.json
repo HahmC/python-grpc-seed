@@ -9,6 +9,10 @@
                   {
                       "service": "GrpcServer",
                       "method": "GetShape"
+                  },
+                  {
+                      "service": "GrpcServer",
+                      "method": "GetPerimetersGreaterThan"
                   }
               ],
               "retryPolicy": {

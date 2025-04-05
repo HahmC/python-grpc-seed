@@ -24,31 +24,35 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11grpc_server.proto\"B\n\x13\x43reateShapeResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\"e\n\x10GetShapeResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x1a\n\x05shape\x18\x03 \x01(\x0b\x32\x06.ShapeH\x00\x88\x01\x01\x42\x08\n\x06_shape\"u\n GetPerimetersGreaterThanResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x1a\n\x05shape\x18\x03 \x01(\x0b\x32\x06.ShapeH\x00\x88\x01\x01\x42\x08\n\x06_shape\"%\n\x0cMinPerimeter\x12\x15\n\rmin_perimeter\x18\x01 \x01(\x01\"\x1f\n\tShapeType\x12\x12\n\nshape_type\x18\x01 \x01(\t\"\x1b\n\x07ShapeId\x12\x10\n\x08shape_id\x18\x01 \x01(\t\"J\n\x05Shape\x12\x10\n\x08shape_id\x18\x01 \x01(\t\x12\x12\n\nshape_type\x18\x02 \x01(\t\x12\x1b\n\x06\x63oords\x18\x03 \x03(\x0b\x32\x0b.ShapeCoord\"8\n\nShapeCoord\x12\x0e\n\x01x\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x0e\n\x01y\x18\x02 \x01(\x05H\x01\x88\x01\x01\x42\x04\n\x02_xB\x04\n\x02_y*c\n\x04\x43ode\x12\x06\n\x02OK\x10\x00\x12\x11\n\rINVALID_SHAPE\x10\x64\x12\x15\n\x11INVALID_PERIMETER\x10\x65\x12\x14\n\x10INVALID_SHAPE_ID\x10\x66\x12\x13\n\x0fSHAPE_NOT_FOUND\x10g2\xbc\x01\n\nGrpcServer\x12\x31\n\x0b\x43reateShape\x12\n.ShapeType\x1a\x14.CreateShapeResponse\"\x00\x12)\n\x08GetShape\x12\x08.ShapeId\x1a\x11.GetShapeResponse\"\x00\x12P\n\x18GetPerimetersGreaterThan\x12\r.MinPerimeter\x1a!.GetPerimetersGreaterThanResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11grpc_server.proto\"h\n\x13\x43reateShapeResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x1a\n\x05shape\x18\x03 \x01(\x0b\x32\x06.ShapeH\x00\x88\x01\x01\x42\x08\n\x06_shape\"e\n\x10GetShapeResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x1a\n\x05shape\x18\x03 \x01(\x0b\x32\x06.ShapeH\x00\x88\x01\x01\x42\x08\n\x06_shape\"\x9b\x01\n GetPerimetersGreaterThanResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\tperimeter\x18\x03 \x01(\x01H\x00\x88\x01\x01\x12\x1a\n\x05shape\x18\x04 \x01(\x0b\x32\x06.ShapeH\x01\x88\x01\x01\x42\x0c\n\n_perimeterB\x08\n\x06_shape\"\xa7\x01\n\x14GetTotalAreaResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x17\n\ntotal_area\x18\x03 \x01(\x01H\x00\x88\x01\x01\x12\x1b\n\tvalid_ids\x18\x04 \x03(\x0b\x32\x08.ShapeId\x12\x1d\n\x0binvalid_ids\x18\x05 \x03(\x0b\x32\x08.ShapeIdB\r\n\x0b_total_area\"\x81\x01\n\x10GetAreasResponse\x12\x1a\n\x0bstatus_code\x18\x01 \x01(\x0e\x32\x05.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x11\n\x04\x61rea\x18\x03 \x01(\x01H\x00\x88\x01\x01\x12\x1a\n\x05shape\x18\x04 \x01(\x0b\x32\x06.ShapeH\x01\x88\x01\x01\x42\x07\n\x05_areaB\x08\n\x06_shape\"%\n\x0cMinPerimeter\x12\x15\n\rmin_perimeter\x18\x01 \x01(\x01\"\x1f\n\tShapeType\x12\x12\n\nshape_type\x18\x01 \x01(\t\"\x1b\n\x07ShapeId\x12\x10\n\x08shape_id\x18\x01 \x01(\t\"J\n\x05Shape\x12\x10\n\x08shape_id\x18\x01 \x01(\t\x12\x12\n\nshape_type\x18\x02 \x01(\t\x12\x1b\n\x06\x63oords\x18\x03 \x03(\x0b\x32\x0b.ShapeCoord\"8\n\nShapeCoord\x12\x0e\n\x01x\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x0e\n\x01y\x18\x02 \x01(\x05H\x01\x88\x01\x01\x42\x04\n\x02_xB\x04\n\x02_y*w\n\x04\x43ode\x12\x06\n\x02OK\x10\x00\x12\x11\n\rINVALID_SHAPE\x10\x64\x12\x15\n\x11INVALID_PERIMETER\x10\x65\x12\x14\n\x10INVALID_SHAPE_ID\x10\x66\x12\x13\n\x0fSHAPE_NOT_FOUND\x10g\x12\x12\n\x0e\x41REA_NOT_FOUND\x10h2\xa0\x02\n\nGrpcServer\x12\x31\n\x0b\x43reateShape\x12\n.ShapeType\x1a\x14.CreateShapeResponse\"\x00\x12)\n\x08GetShape\x12\x08.ShapeId\x1a\x11.GetShapeResponse\"\x00\x12P\n\x18GetPerimetersGreaterThan\x12\r.MinPerimeter\x1a!.GetPerimetersGreaterThanResponse\"\x00\x30\x01\x12\x33\n\x0cGetTotalArea\x12\x08.ShapeId\x1a\x15.GetTotalAreaResponse\"\x00(\x01\x12-\n\x08GetAreas\x12\x08.ShapeId\x1a\x11.GetAreasResponse\"\x00(\x01\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'grpc_server_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_CODE']._serialized_start=546
-  _globals['_CODE']._serialized_end=645
+  _globals['_CODE']._serialized_start=925
+  _globals['_CODE']._serialized_end=1044
   _globals['_CREATESHAPERESPONSE']._serialized_start=21
-  _globals['_CREATESHAPERESPONSE']._serialized_end=87
-  _globals['_GETSHAPERESPONSE']._serialized_start=89
-  _globals['_GETSHAPERESPONSE']._serialized_end=190
-  _globals['_GETPERIMETERSGREATERTHANRESPONSE']._serialized_start=192
-  _globals['_GETPERIMETERSGREATERTHANRESPONSE']._serialized_end=309
-  _globals['_MINPERIMETER']._serialized_start=311
-  _globals['_MINPERIMETER']._serialized_end=348
-  _globals['_SHAPETYPE']._serialized_start=350
-  _globals['_SHAPETYPE']._serialized_end=381
-  _globals['_SHAPEID']._serialized_start=383
-  _globals['_SHAPEID']._serialized_end=410
-  _globals['_SHAPE']._serialized_start=412
-  _globals['_SHAPE']._serialized_end=486
-  _globals['_SHAPECOORD']._serialized_start=488
-  _globals['_SHAPECOORD']._serialized_end=544
-  _globals['_GRPCSERVER']._serialized_start=648
-  _globals['_GRPCSERVER']._serialized_end=836
+  _globals['_CREATESHAPERESPONSE']._serialized_end=125
+  _globals['_GETSHAPERESPONSE']._serialized_start=127
+  _globals['_GETSHAPERESPONSE']._serialized_end=228
+  _globals['_GETPERIMETERSGREATERTHANRESPONSE']._serialized_start=231
+  _globals['_GETPERIMETERSGREATERTHANRESPONSE']._serialized_end=386
+  _globals['_GETTOTALAREARESPONSE']._serialized_start=389
+  _globals['_GETTOTALAREARESPONSE']._serialized_end=556
+  _globals['_GETAREASRESPONSE']._serialized_start=559
+  _globals['_GETAREASRESPONSE']._serialized_end=688
+  _globals['_MINPERIMETER']._serialized_start=690
+  _globals['_MINPERIMETER']._serialized_end=727
+  _globals['_SHAPETYPE']._serialized_start=729
+  _globals['_SHAPETYPE']._serialized_end=760
+  _globals['_SHAPEID']._serialized_start=762
+  _globals['_SHAPEID']._serialized_end=789
+  _globals['_SHAPE']._serialized_start=791
+  _globals['_SHAPE']._serialized_end=865
+  _globals['_SHAPECOORD']._serialized_start=867
+  _globals['_SHAPECOORD']._serialized_end=923
+  _globals['_GRPCSERVER']._serialized_start=1047
+  _globals['_GRPCSERVER']._serialized_end=1335
 # @@protoc_insertion_point(module_scope)

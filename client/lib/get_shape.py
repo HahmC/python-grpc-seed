@@ -7,7 +7,6 @@ def get_shape(stub: GrpcService.GrpcServerStub):
     """
     Invoces the GetShape gRPC method
     
-    :param methods: list of available gRPC methods, only used to callback to main menu
     :param stub: gRPC stub to invoke method
     :return: None
     """
@@ -35,7 +34,7 @@ def get_shape(stub: GrpcService.GrpcServerStub):
         return
 
     # Validate shape_id format
-    if shape_id[1] is not '-' or int(shape_id[2:]) < 0:
+    if shape_id[1] != '-' or int(shape_id[2:]) < 0:
         print(f"{shape_id} is not a valid shape_id")
         print()
         return
@@ -58,14 +57,6 @@ def get_shape(stub: GrpcService.GrpcServerStub):
                 print(coord_string)
 
             print("]")
-
-        # If a shape is not found, prompt the user for a different shape_id to lookup
-        elif response.status_code == GrpcServer.Code.SHAPE_NOT_FOUND:
-            print(f"StatusCode.{GrpcServer.Code.Name(response.status_code)} - {response.message}")
-            print()
-            print()
-            return
-
 
     except grpc.RpcError as e:
         print("Shape was not retrieved")

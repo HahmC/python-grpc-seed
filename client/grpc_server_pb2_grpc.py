@@ -49,6 +49,16 @@ class GrpcServerStub(object):
                 request_serializer=grpc__server__pb2.MinPerimeter.SerializeToString,
                 response_deserializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
                 _registered_method=True)
+        self.GetTotalArea = channel.stream_unary(
+                '/GrpcServer/GetTotalArea',
+                request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
+                response_deserializer=grpc__server__pb2.GetTotalAreaResponse.FromString,
+                _registered_method=True)
+        self.GetAreas = channel.stream_stream(
+                '/GrpcServer/GetAreas',
+                request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
+                response_deserializer=grpc__server__pb2.GetAreasResponse.FromString,
+                _registered_method=True)
 
 
 class GrpcServerServicer(object):
@@ -72,6 +82,18 @@ class GrpcServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetTotalArea(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAreas(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GrpcServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -89,6 +111,16 @@ def add_GrpcServerServicer_to_server(servicer, server):
                     servicer.GetPerimetersGreaterThan,
                     request_deserializer=grpc__server__pb2.MinPerimeter.FromString,
                     response_serializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.SerializeToString,
+            ),
+            'GetTotalArea': grpc.stream_unary_rpc_method_handler(
+                    servicer.GetTotalArea,
+                    request_deserializer=grpc__server__pb2.ShapeId.FromString,
+                    response_serializer=grpc__server__pb2.GetTotalAreaResponse.SerializeToString,
+            ),
+            'GetAreas': grpc.stream_stream_rpc_method_handler(
+                    servicer.GetAreas,
+                    request_deserializer=grpc__server__pb2.ShapeId.FromString,
+                    response_serializer=grpc__server__pb2.GetAreasResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -172,6 +204,60 @@ class GrpcServer(object):
             '/GrpcServer/GetPerimetersGreaterThan',
             grpc__server__pb2.MinPerimeter.SerializeToString,
             grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTotalArea(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(
+            request_iterator,
+            target,
+            '/GrpcServer/GetTotalArea',
+            grpc__server__pb2.ShapeId.SerializeToString,
+            grpc__server__pb2.GetTotalAreaResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetAreas(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/GrpcServer/GetAreas',
+            grpc__server__pb2.ShapeId.SerializeToString,
+            grpc__server__pb2.GetAreasResponse.FromString,
             options,
             channel_credentials,
             insecure,

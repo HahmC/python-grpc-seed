@@ -4,11 +4,14 @@ service GrpcServer {
     rpc CreateShape(ShapeType) returns (CreateShapeResponse) {}
     rpc GetShape(ShapeId) returns (GetShapeResponse) {}
     rpc GetPerimetersGreaterThan(MinPerimeter) returns (stream GetPerimetersGreaterThanResponse) {}
+    rpc GetTotalArea(stream ShapeId) returns (GetTotalAreaResponse) {}
+    rpc GetAreas(stream ShapeId) returns (stream GetAreasResponse) {}
 }
 
 message CreateShapeResponse {
     Code status_code = 1;
     string message = 2;
+    optional Shape shape = 3;
 }
 
 message GetShapeResponse {
@@ -20,7 +23,23 @@ message GetShapeResponse {
 message GetPerimetersGreaterThanResponse {
     Code status_code = 1;
     string message = 2;
-    optional Shape shape = 3;
+    optional double perimeter = 3;
+    optional Shape shape = 4;
+}
+
+message GetTotalAreaResponse {
+    Code status_code = 1;
+    string message = 2;
+    optional double total_area = 3;
+    repeated ShapeId valid_ids = 4;
+    repeated ShapeId invalid_ids = 5;
+}
+
+message GetAreasResponse {
+    Code status_code = 1;
+    string message = 2;
+    optional double area = 3;
+    optional Shape shape = 4;
 }
 
 message MinPerimeter {
@@ -54,4 +73,5 @@ enum Code {
     INVALID_PERIMETER = 101;
     INVALID_SHAPE_ID = 102;
     SHAPE_NOT_FOUND = 103;
+    AREA_NOT_FOUND = 104;
 }
