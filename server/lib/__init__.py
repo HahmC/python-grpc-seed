@@ -1,2 +1,2 @@
 from .logger import *
-from .grpc_server_servicer import *
+from .shape_server import *

@@ -1,16 +1,12 @@
 import lib.functions as helpers
-from .create_shape import create_shape
-from .get_shape import get_shape
-from .get_perimeters_greater_than import get_perimeters_greater_than
-from .get_total_area import get_total_area
-from .get_areas import get_areas
+from lib.shape_client import ShapeClient
 
-def get_method_choice(methods, stub):
+def get_method_choice(methods, client: ShapeClient):
     """
     Prompt the user for which gRPC method they would like to run
 
     :param methods: Available methods to call
-    :param stub: gRPC stub for method execution
+    :param client: gRPC client object used for method execution
     :return: None
     """
 
@@ -26,27 +22,27 @@ def get_method_choice(methods, stub):
         print()
         print()
         print("Welcome to CreateShape!")
-        create_shape(methods, stub)
+        client.create_shape()
     elif fxn == 'G':
         print()
         print()
         print("Welcome to GetShape!")
-        get_shape(stub)
+        client.get_shape()
     elif fxn == 'P':
         print()
         print()
         print("Welcome to GetPerimetersGreaterThan!")
-        get_perimeters_greater_than(stub)
+        client.get_perimeters_greater_than()
     elif fxn == 'T':
         print()
         print()
         print("Welcome to GetTotalArea!")
-        get_total_area(stub)
+        client.get_total_area()
     elif fxn == 'A':
         print()
         print()
         print("Welcome to GetAreas!")
-        get_areas(stub)
+        client.get_areas()
     elif fxn == 'E':
         exit()
     else:
@@ -55,9 +51,9 @@ def get_method_choice(methods, stub):
         # Reset to beginning choice
         print()
         print()
-        get_method_choice(methods, stub)
+        get_method_choice(methods, client)
 
     # Loop back to beginning of choice once successfully completing a method
     print()
     print()
-    get_method_choice(methods, stub)
+    get_method_choice(methods, client)

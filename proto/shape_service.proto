@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-service GrpcServer {
+service ShapeService {
     rpc CreateShape(ShapeType) returns (CreateShapeResponse) {}
     rpc GetShape(ShapeId) returns (GetShapeResponse) {}
     rpc GetPerimetersGreaterThan(MinPerimeter) returns (stream GetPerimetersGreaterThanResponse) {}

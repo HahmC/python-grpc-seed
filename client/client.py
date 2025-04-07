@@ -3,31 +3,22 @@ import json
 
 from lib.logger import Logger
 import lib.functions as helpers
-import grpc_server_pb2_grpc as GrpcService
+from lib.shape_client import ShapeClient
 from lib.get_method_choice import get_method_choice
 
 def main(logger, config, methods):
     # Create the gRPC channel
     logger.info("Creating gRPC channel...")
 
-    client_options = helpers.get_grpc_config(config['general']['grpc_client_config'])
-
-    channel = grpc.insecure_channel(
-        f"{config['general']['grpc_host']}:{config['general']['grpc_port']}",
-        options=[
-            ("grpc.service_config", json.dumps(client_options))
-        ]
-    )
-
-    stub = GrpcService.GrpcServerStub(channel)
+    client: ShapeClient = ShapeClient(config, logger)
 
     # Create Console App
-    app(methods, stub)
+    app(methods, client)
 
-def app(methods, stub):
+def app(methods, client: ShapeClient):
     print('Welcome to the gRPC Console Client!')
 
-    get_method_choice(methods, stub)
+    get_method_choice(methods, client)
 
 if __name__ == "__main__":
     # Setup Configuration and Logging

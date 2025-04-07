@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import grpc_server_pb2 as grpc__server__pb2
+import shape_service_pb2 as shape__service__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in grpc_server_pb2_grpc.py depends on'
+        + f' but the generated code in shape_service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class GrpcServerStub(object):
+class ShapeServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -35,33 +35,33 @@ class GrpcServerStub(object):
             channel: A grpc.Channel.
         """
         self.CreateShape = channel.unary_unary(
-                '/GrpcServer/CreateShape',
-                request_serializer=grpc__server__pb2.ShapeType.SerializeToString,
-                response_deserializer=grpc__server__pb2.CreateShapeResponse.FromString,
+                '/ShapeService/CreateShape',
+                request_serializer=shape__service__pb2.ShapeType.SerializeToString,
+                response_deserializer=shape__service__pb2.CreateShapeResponse.FromString,
                 _registered_method=True)
         self.GetShape = channel.unary_unary(
-                '/GrpcServer/GetShape',
-                request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
-                response_deserializer=grpc__server__pb2.GetShapeResponse.FromString,
+                '/ShapeService/GetShape',
+                request_serializer=shape__service__pb2.ShapeId.SerializeToString,
+                response_deserializer=shape__service__pb2.GetShapeResponse.FromString,
                 _registered_method=True)
         self.GetPerimetersGreaterThan = channel.unary_stream(
-                '/GrpcServer/GetPerimetersGreaterThan',
-                request_serializer=grpc__server__pb2.MinPerimeter.SerializeToString,
-                response_deserializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
+                '/ShapeService/GetPerimetersGreaterThan',
+                request_serializer=shape__service__pb2.MinPerimeter.SerializeToString,
+                response_deserializer=shape__service__pb2.GetPerimetersGreaterThanResponse.FromString,
                 _registered_method=True)
         self.GetTotalArea = channel.stream_unary(
-                '/GrpcServer/GetTotalArea',
-                request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
-                response_deserializer=grpc__server__pb2.GetTotalAreaResponse.FromString,
+                '/ShapeService/GetTotalArea',
+                request_serializer=shape__service__pb2.ShapeId.SerializeToString,
+                response_deserializer=shape__service__pb2.GetTotalAreaResponse.FromString,
                 _registered_method=True)
         self.GetAreas = channel.stream_stream(
-                '/GrpcServer/GetAreas',
-                request_serializer=grpc__server__pb2.ShapeId.SerializeToString,
-                response_deserializer=grpc__server__pb2.GetAreasResponse.FromString,
+                '/ShapeService/GetAreas',
+                request_serializer=shape__service__pb2.ShapeId.SerializeToString,
+                response_deserializer=shape__service__pb2.GetAreasResponse.FromString,
                 _registered_method=True)
 
 
-class GrpcServerServicer(object):
+class ShapeServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def CreateShape(self, request, context):
@@ -95,42 +95,42 @@ class GrpcServerServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_GrpcServerServicer_to_server(servicer, server):
+def add_ShapeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CreateShape': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateShape,
-                    request_deserializer=grpc__server__pb2.ShapeType.FromString,
-                    response_serializer=grpc__server__pb2.CreateShapeResponse.SerializeToString,
+                    request_deserializer=shape__service__pb2.ShapeType.FromString,
+                    response_serializer=shape__service__pb2.CreateShapeResponse.SerializeToString,
             ),
             'GetShape': grpc.unary_unary_rpc_method_handler(
                     servicer.GetShape,
-                    request_deserializer=grpc__server__pb2.ShapeId.FromString,
-                    response_serializer=grpc__server__pb2.GetShapeResponse.SerializeToString,
+                    request_deserializer=shape__service__pb2.ShapeId.FromString,
+                    response_serializer=shape__service__pb2.GetShapeResponse.SerializeToString,
             ),
             'GetPerimetersGreaterThan': grpc.unary_stream_rpc_method_handler(
                     servicer.GetPerimetersGreaterThan,
-                    request_deserializer=grpc__server__pb2.MinPerimeter.FromString,
-                    response_serializer=grpc__server__pb2.GetPerimetersGreaterThanResponse.SerializeToString,
+                    request_deserializer=shape__service__pb2.MinPerimeter.FromString,
+                    response_serializer=shape__service__pb2.GetPerimetersGreaterThanResponse.SerializeToString,
             ),
             'GetTotalArea': grpc.stream_unary_rpc_method_handler(
                     servicer.GetTotalArea,
-                    request_deserializer=grpc__server__pb2.ShapeId.FromString,
-                    response_serializer=grpc__server__pb2.GetTotalAreaResponse.SerializeToString,
+                    request_deserializer=shape__service__pb2.ShapeId.FromString,
+                    response_serializer=shape__service__pb2.GetTotalAreaResponse.SerializeToString,
             ),
             'GetAreas': grpc.stream_stream_rpc_method_handler(
                     servicer.GetAreas,
-                    request_deserializer=grpc__server__pb2.ShapeId.FromString,
-                    response_serializer=grpc__server__pb2.GetAreasResponse.SerializeToString,
+                    request_deserializer=shape__service__pb2.ShapeId.FromString,
+                    response_serializer=shape__service__pb2.GetAreasResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'GrpcServer', rpc_method_handlers)
+            'ShapeService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('GrpcServer', rpc_method_handlers)
+    server.add_registered_method_handlers('ShapeService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class GrpcServer(object):
+class ShapeService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -147,9 +147,9 @@ class GrpcServer(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/GrpcServer/CreateShape',
-            grpc__server__pb2.ShapeType.SerializeToString,
-            grpc__server__pb2.CreateShapeResponse.FromString,
+            '/ShapeService/CreateShape',
+            shape__service__pb2.ShapeType.SerializeToString,
+            shape__service__pb2.CreateShapeResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -174,9 +174,9 @@ class GrpcServer(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/GrpcServer/GetShape',
-            grpc__server__pb2.ShapeId.SerializeToString,
-            grpc__server__pb2.GetShapeResponse.FromString,
+            '/ShapeService/GetShape',
+            shape__service__pb2.ShapeId.SerializeToString,
+            shape__service__pb2.GetShapeResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -201,9 +201,9 @@ class GrpcServer(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/GrpcServer/GetPerimetersGreaterThan',
-            grpc__server__pb2.MinPerimeter.SerializeToString,
-            grpc__server__pb2.GetPerimetersGreaterThanResponse.FromString,
+            '/ShapeService/GetPerimetersGreaterThan',
+            shape__service__pb2.MinPerimeter.SerializeToString,
+            shape__service__pb2.GetPerimetersGreaterThanResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -228,9 +228,9 @@ class GrpcServer(object):
         return grpc.experimental.stream_unary(
             request_iterator,
             target,
-            '/GrpcServer/GetTotalArea',
-            grpc__server__pb2.ShapeId.SerializeToString,
-            grpc__server__pb2.GetTotalAreaResponse.FromString,
+            '/ShapeService/GetTotalArea',
+            shape__service__pb2.ShapeId.SerializeToString,
+            shape__service__pb2.GetTotalAreaResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -255,9 +255,9 @@ class GrpcServer(object):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            '/GrpcServer/GetAreas',
-            grpc__server__pb2.ShapeId.SerializeToString,
-            grpc__server__pb2.GetAreasResponse.FromString,
+            '/ShapeService/GetAreas',
+            shape__service__pb2.ShapeId.SerializeToString,
+            shape__service__pb2.GetAreasResponse.FromString,
             options,
             channel_credentials,
             insecure,

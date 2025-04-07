@@ -3,16 +3,24 @@
           {
               "name": [
                   {
-                      "service": "GrpcServer",
+                      "service": "ShapeService",
                       "method": "CreateShape"
                   },
                   {
-                      "service": "GrpcServer",
+                      "service": "ShapeService",
                       "method": "GetShape"
                   },
                   {
-                      "service": "GrpcServer",
+                      "service": "ShapeService",
                       "method": "GetPerimetersGreaterThan"
+                  },
+                  {
+                      "service": "ShapeService",
+                      "method": "GetAreas"
+                  },
+                  {
+                      "service": "ShapeService",
+                      "method": "GetTotalArea"
                   }
               ],
               "retryPolicy": {
