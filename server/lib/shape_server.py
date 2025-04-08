@@ -14,16 +14,17 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
     Shape Server - gRPC server serving all the methods defined in proto/shape_service.proto
     """
 
-    def __init__(self, logger: Logger, db_path: str, shape_limits: dict):
+    def __init__(self, logger: Logger, config: dict):
         self.logger: Logger = logger
-        self.db_path: str = db_path
-        self.max_height: int = int(shape_limits['max_height'])
-        self.max_width: int = int(shape_limits['max_width'])
+        self.config: dict = config
+        self.db_path: str = self.config['general']['json_path']
+        self.max_height: int = int(self.config['shape']['max_height'])
+        self.max_width: int = int(self.config['shape']['max_width'])
 
         # If database .json exists use that file, otherwise create a new one
-        if os.path.exists(db_path):
+        if os.path.exists(self.db_path):
             try:
-                with open(db_path, 'r') as json_file:
+                with open(self.db_path, 'r') as json_file:
                     self.data = json.load(json_file)
             except IOError as e:
                 logger.error(f"Could not load json file: {e}")

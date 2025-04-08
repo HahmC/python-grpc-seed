@@ -1,23 +1,52 @@
 import grpc
 import json
 import time
+import contextlib
 from typing import Iterator, List
 from configparser import ConfigParser
 
 from lib.logger import Logger
+from lib.functions import credentials
+from lib.auth_gateway import AuthGateway
 import shape_service_pb2 as ShapeService
 import shape_service_pb2_grpc as ShapeServiceGrpc
+
+# TODO: Cleanup AuthGateway for providing metadata credentials
+# TODO: Make client async
+# TODO: Implement more metadata for each method
+# TODO: Cleanup credentials in credentials folder
+# TODO: Implement Health Check
+# TODO: Implement Deadlines/Timeouts for each method
+# TODO: Look into all the options for the service config file
+# TODO: Look into implementing some sort of connection pooling [Last]
 
 class ShapeClient:
     """
     Shape Client - gRPC client serving all the methods defined in proto/shape_service.proto
     """
+    # @contextlib.contextmanager
     def __init__(self, config: ConfigParser, logger: Logger):
         self.logger: Logger = logger
 
+        ROOT_CERTIFICATE = credentials._load_credential_from_file(config['general']['root_certificate'])
+
         # Setup gRPC Channel
-        self.channel = grpc.insecure_channel(
+        call_credential = grpc.metadata_call_credentials(
+            AuthGateway(config['general']['signature_header'], config['general']['signature_value']), name="auth gateway"
+        )
+
+        channel_credential = grpc.ssl_channel_credentials(
+            ROOT_CERTIFICATE
+        )
+
+        composite_credentials = grpc.composite_channel_credentials(
+            channel_credential,
+            call_credential
+        )
+
+        self.channel = grpc.secure_channel(
             f"{config['general']['grpc_host']}:{config['general']['grpc_port']}",
+            credentials=composite_credentials,
             options=[
                 ("shape.service_config", json.dumps(config['general']['grpc_client_config']))
             ]
