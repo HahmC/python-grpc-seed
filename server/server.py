@@ -8,9 +8,7 @@ import lib.functions as helpers
 from lib.shape_server import ShapeServer
 import shape_service_pb2_grpc as ShapeServiceGrpc
 
-# TODO: Cleanup SignatureValidatorInterceptor
 # TODO: Look into adding correlation-id interceptor to add a correlation-id to the logger
-# TODO: Cleanup credentials in credentials folder
 # TODO: Add HealthChecks
 # TODO: More interceptors?
 

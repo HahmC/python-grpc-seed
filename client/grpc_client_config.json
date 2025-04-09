@@ -3,33 +3,17 @@
           {
               "name": [
                   {
-                      "service": "ShapeService",
-                      "method": "CreateShape"
-                  },
-                  {
-                      "service": "ShapeService",
-                      "method": "GetShape"
-                  },
-                  {
-                      "service": "ShapeService",
-                      "method": "GetPerimetersGreaterThan"
-                  },
-                  {
-                      "service": "ShapeService",
-                      "method": "GetAreas"
-                  },
-                  {
-                      "service": "ShapeService",
-                      "method": "GetTotalArea"
+
                   }
               ],
               "retryPolicy": {
-                  "maxAttempts": 2,
+                  "maxAttempts": 5,
                   "initialBackoff": "0.1s",
-                  "maxBackoff": "2s",
+                  "maxBackoff": "1s",
                   "backoffMultiplier": 2,
                   "retryableStatusCodes": ["UNAVAILABLE", "DEADLINE_EXCEEDED"]
-              }
+              },
+              "timeout": "15s"
           }
       ]
   }

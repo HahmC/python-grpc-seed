@@ -27,7 +27,5 @@ if __name__ == "__main__":
     client_logger = Logger(client_config)
     helpers.log_config(client_logger, client_config)
 
-    # client_methods = [client_config['gRPC_methods'][key] for key in client_config['gRPC_methods']]
-
     # Start App
     main(client_logger, client_config, client_config['gRPC_methods'])
