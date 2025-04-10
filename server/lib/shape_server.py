@@ -8,6 +8,7 @@ from typing import Iterator, List
 from .logger import Logger
 import shape_service_pb2 as ShapeService
 import shape_service_pb2_grpc as ShapeServiceGrpc
+from correlation_id_context import set_correlation_id
 
 class ShapeServer(ShapeServiceGrpc.ShapeService):
     """
@@ -39,68 +40,74 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         :param context: context to support error codes
         :return: CreateShapeResponse - pre-defined proto response to this method containing a status code, message
         """
-        self.logger.info(f"CreateShape called with request: {request}")
 
-        response: ShapeService.CreateShapeResponse = ShapeService.CreateShapeResponse(
-            status_code=ShapeService.Code.OK,
-            message=""
-        )
+        # Extract metadata from context and set the correlation_id so that all logs from this invocation contain
+        # the correlation_id of the call
+        metadata = {key: value for key, value in context.invocation_metadata()}
 
-        if request.shape_type == "Triangle":
-            self.logger.info("Generating Triangle...")
+        with set_correlation_id(metadata['x-correlation-id']):
+            self.logger.info(f"CreateShape called with request: {request}")
 
-            # Generate Triangle
-            shape: ShapeService.Shape = self.__get_triangle()
-            shape_json: dict = self.__get_json_from_shape(shape)
-            self.data["Triangles"].extend([shape_json])
+            response: ShapeService.CreateShapeResponse = ShapeService.CreateShapeResponse(
+                status_code=ShapeService.Code.OK,
+                message=""
+            )
 
-            self.logger.info(f"Triangle: {shape}")
+            if request.shape_type == "Triangle":
+                self.logger.info("Generating Triangle...")
 
-            response.status_code = ShapeService.Code.OK
-            response.message = f"Successfully Created Triangle: {shape_json}"
-            response.shape.CopyFrom(shape)
+                # Generate Triangle
+                shape: ShapeService.Shape = self.__get_triangle()
+                shape_json: dict = self.__get_json_from_shape(shape)
+                self.data["Triangles"].extend([shape_json])
 
-        elif request.shape_type == "Rectangle":
-            self.logger.info("Generating Rectangle...")
+                self.logger.info(f"Triangle: {shape}")
 
-            # Generate Rectangle
-            shape: ShapeService.Shape = self.__get_rectangle()
-            shape_json: dict = self.__get_json_from_shape(shape)
-            self.data["Rectangles"].extend([shape_json])
+                response.status_code = ShapeService.Code.OK
+                response.message = f"Successfully Created Triangle: {shape_json}"
+                response.shape.CopyFrom(shape)
 
-            self.logger.info(f"Rectangle: {shape}")
+            elif request.shape_type == "Rectangle":
+                self.logger.info("Generating Rectangle...")
 
-            response.status_code = ShapeService.Code.OK
-            response.message = f"Successfully Created Rectangle: {shape_json}"
-            response.shape.CopyFrom(shape)
+                # Generate Rectangle
+                shape: ShapeService.Shape = self.__get_rectangle()
+                shape_json: dict = self.__get_json_from_shape(shape)
+                self.data["Rectangles"].extend([shape_json])
 
-        elif request.shape_type == "Pentagon":
-            self.logger.info("Generating Pentagon...")
+                self.logger.info(f"Rectangle: {shape}")
 
-            # Generate Pentagon
-            shape: ShapeService.Shape = self.__get_pentagon()
-            shape_json: dict = self.__get_json_from_shape(shape)
-            self.data["Pentagons"].extend([shape_json])
+                response.status_code = ShapeService.Code.OK
+                response.message = f"Successfully Created Rectangle: {shape_json}"
+                response.shape.CopyFrom(shape)
 
-            self.logger.info(f"Pentagon: {shape}")
+            elif request.shape_type == "Pentagon":
+                self.logger.info("Generating Pentagon...")
 
-            response.status_code = ShapeService.Code.OK
-            response.message = f"Successfully Created Pentagon: {shape_json}"
-            response.shape.CopyFrom(shape)
+                # Generate Pentagon
+                shape: ShapeService.Shape = self.__get_pentagon()
+                shape_json: dict = self.__get_json_from_shape(shape)
+                self.data["Pentagons"].extend([shape_json])
 
-        else:
-            response.status_code = ShapeService.Code.INVALID_SHAPE
-            response.message = f"shape_type {request.shape_type} is not supported at this time"
+                self.logger.info(f"Pentagon: {shape}")
 
-        # Write data back to db file
-        try:
-            with open(self.db_path, 'w') as json_file:
-                json.dump(self.data, json_file, indent=4)
-            self.logger.info(f"Data successfully written to {self.db_path}")
-        except IOError as e:
-            self.logger.error(f"Error writing to file: {e}")
+                response.status_code = ShapeService.Code.OK
+                response.message = f"Successfully Created Pentagon: {shape_json}"
+                response.shape.CopyFrom(shape)
 
-        return response
+            else:
+                response.status_code = ShapeService.Code.INVALID_SHAPE
+                response.message = f"shape_type {request.shape_type} is not supported at this time"
+
+            # Write data back to db file
+            try:
+                with open(self.db_path, 'w') as json_file:
+                    json.dump(self.data, json_file, indent=4)
+                self.logger.info(f"Data successfully written to {self.db_path}")
+            except IOError as e:
+                self.logger.error(f"Error writing to file: {e}")
+
+            return response
 
     def GetShape(self, request: ShapeService.ShapeId, context) -> ShapeService.GetShapeResponse:
         """
@@ -112,33 +119,39 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         :return: GetShapeResponse - pre-defined proto response to this method containing a status code, message, and shape
                  if a shape was found
         """
-        self.logger.info(f"GetShape called with request: {request}")
 
-        response: ShapeService.GetShapeResponse = ShapeService.GetShapeResponse(
-            status_code=ShapeService.Code.OK,
-            message=""
-        )
+        # Extract metadata from context and set the correlation_id so that all logs from this invocation contain
+        # the correlation_id of the call
+        metadata = {key: value for key, value in context.invocation_metadata()}
 
-        try:
-            # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
-            # the appropriate error
-            shape: ShapeService.Shape = self.__get_shape_from_id(request.shape_id)
+        with set_correlation_id(metadata['x-correlation-id']):
+            self.logger.info(f"GetShape called with request: {request}")
 
-            response.status_code = ShapeService.Code.OK
-            response.message = f"Successfully retrieved {request.shape_id}"
-            response.shape.CopyFrom(shape)
+            response: ShapeService.GetShapeResponse = ShapeService.GetShapeResponse(
+                status_code=ShapeService.Code.OK,
+                message=""
+            )
 
-        except LookupError as error:
+            try:
+                # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
+                # the appropriate error
+                shape: ShapeService.Shape = self.__get_shape_from_id(request.shape_id)
 
-            if int(str(error)) == ShapeService.Code.INVALID_SHAPE:
-                response.status_code = ShapeService.Code.INVALID_SHAPE
-                response.message = f"shape_id {request.shape_id} is not a valid shape_id"
+                response.status_code = ShapeService.Code.OK
+                response.message = f"Successfully retrieved {request.shape_id}"
+                response.shape.CopyFrom(shape)
 
-            elif int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
-                response.status_code = ShapeService.Code.SHAPE_NOT_FOUND
-                response.message = f"shape_id {request.shape_id} not found in database"
+            except LookupError as error:
 
-        return response
+                if int(str(error)) == ShapeService.Code.INVALID_SHAPE:
+                    response.status_code = ShapeService.Code.INVALID_SHAPE
+                    response.message = f"shape_id {request.shape_id} is not a valid shape_id"
+
+                elif int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
+                    response.status_code = ShapeService.Code.SHAPE_NOT_FOUND
+                    response.message = f"shape_id {request.shape_id} not found in database"
+
+            return response
 
     def GetPerimetersGreaterThan(self, request: ShapeService.MinPerimeter, context) -> Iterator[ShapeService.GetPerimetersGreaterThanResponse]:
         """
@@ -149,45 +162,50 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         :return: iterable object of all the shapes with a perimeter greater than the provided value
         """
 
-        self.logger.info(f"GetPerimetersGreaterThan called with {request}")
+        # Extract metadata from context and set the correlation_id so that all logs from this invocation contain
+        # the correlation_id of the call
+        metadata = {key: value for key, value in context.invocation_metadata()}
 
-        if request.min_perimeter < 0:
-            yield ShapeService.GetPerimetersGreaterThanResponse(
-                status_code=ShapeService.Code.INVALID_PERIMETER,
-                message=f"{request.min_perimeter} is an invalid perimeter value. Perimeters must be greater than or equal to 0"
-            )
+        with set_correlation_id(metadata['x-correlation-id']):
+            self.logger.info(f"GetPerimetersGreaterThan called with {request}")
 
-            return
+            if request.min_perimeter < 0:
+                yield ShapeService.GetPerimetersGreaterThanResponse(
+                    status_code=ShapeService.Code.INVALID_PERIMETER,
+                    message=f"{request.min_perimeter} is an invalid perimeter value. Perimeters must be greater than or equal to 0"
+                )
 
-        found_shape: bool = False
+                return
 
-        for shape_type in self.data:
-            self.logger.info(f"Calculating perimeters of {shape_type}.....")
+            found_shape: bool = False
 
-            for s in self.data[shape_type]:
-                shape: ShapeService.Shape = self.__get_shape_from_json(s)
-                perimeter: float = round(self.__get_perimeter(shape), 2)
+            for shape_type in self.data:
+                self.logger.info(f"Calculating perimeters of {shape_type}.....")
 
-                self.logger.info(f"{shape.shape_id} - P={perimeter} units")
+                for s in self.data[shape_type]:
+                    shape: ShapeService.Shape = self.__get_shape_from_json(s)
+                    perimeter: float = round(self.__get_perimeter(shape), 2)
 
-                if perimeter > request.min_perimeter:
-                    found_shape = True
+                    self.logger.info(f"{shape.shape_id} - P={perimeter} units")
 
-                    yield ShapeService.GetPerimetersGreaterThanResponse(
-                        status_code=ShapeService.Code.OK,
-                        message=f"{shape.shape_id} has a perimeter of {perimeter} units",
-                        perimeter=perimeter,
-                        shape=shape
-                    )
+                    if perimeter > request.min_perimeter:
+                        found_shape = True
 
-                    time.sleep(1) # Added delay to visually see that the results are returned to the user as they become available
+                        yield ShapeService.GetPerimetersGreaterThanResponse(
+                            status_code=ShapeService.Code.OK,
+                            message=f"{shape.shape_id} has a perimeter of {perimeter} units",
+                            perimeter=perimeter,
+                            shape=shape
+                        )
 
-        # If no shapes found with perimeter greater than the specified minimum
-        if not found_shape:
-            yield ShapeService.GetPerimetersGreaterThanResponse(
-                status_code=ShapeService.Code.SHAPE_NOT_FOUND,
-                message=f"No shapes found with perimeter greater than {request.min_perimeter}."
-            )
+                        time.sleep(1) # Added delay to visually see that the results are returned to the user as they become available
+
+            # If no shapes found with perimeter greater than the specified minimum
+            if not found_shape:
+                yield ShapeService.GetPerimetersGreaterThanResponse(
+                    status_code=ShapeService.Code.SHAPE_NOT_FOUND,
+                    message=f"No shapes found with perimeter greater than {request.min_perimeter}."
+                )
 
     def GetTotalArea(self, request: Iterator[ShapeService.ShapeId], context) -> ShapeService.GetTotalAreaResponse:
         """
@@ -199,47 +217,52 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         :return: ShapeService.GetTotalAreaResponse - the total area of all the existing shape_ids provided
         """
 
-        self.logger.info(f"GetTotalArea called with a ShapeService.ShapeId iterator")
+        # Extract metadata from context and set the correlation_id so that all logs from this invocation contain
+        # the correlation_id of the call
+        metadata = {key: value for key, value in context.invocation_metadata()}
 
-        total_area: float = 0.0
-        invalid_ids: List[ShapeService.ShapeId] = []
-        valid_ids: List[ShapeService.ShapeId] = []
+        with set_correlation_id(metadata['x-correlation-id']):
+            self.logger.info(f"GetTotalArea called with a ShapeService.ShapeId iterator")
 
-        response: ShapeService.GetTotalAreaResponse = ShapeService.GetTotalAreaResponse(
-            status_code=ShapeService.Code.OK,
-            message=""
-        )
+            total_area: float = 0.0
+            invalid_ids: List[ShapeService.ShapeId] = []
+            valid_ids: List[ShapeService.ShapeId] = []
 
-        for shape_id in request:
-            try:
-                # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
-                # the appropriate error
-                shape: ShapeService.Shape = self.__get_shape_from_id(shape_id.shape_id)
-                area = self.__get_area(shape)
+            response: ShapeService.GetTotalAreaResponse = ShapeService.GetTotalAreaResponse(
+                status_code=ShapeService.Code.OK,
+                message=""
+            )
 
-                total_area += area
-                valid_ids.append(shape_id)
+            for shape_id in request:
+                try:
+                    # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
+                    # the appropriate error
+                    shape: ShapeService.Shape = self.__get_shape_from_id(shape_id.shape_id)
+                    area = self.__get_area(shape)
 
-                self.logger.info(f"{shape_id.shape_id}: A={area} square units")
-            except LookupError as error:
-                self.logger.error(f"{shape_id.shape_id} not in database")
-                if int(str(error)) == ShapeService.Code.INVALID_SHAPE or int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
-                    invalid_ids.append(shape_id)
+                    total_area += area
+                    valid_ids.append(shape_id)
 
-            self.logger.info(f"Total area at {total_area} square units")
+                    self.logger.info(f"{shape_id.shape_id}: A={area} square units")
+                except LookupError as error:
+                    self.logger.error(f"{shape_id.shape_id} not in database")
+                    if int(str(error)) == ShapeService.Code.INVALID_SHAPE or int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
+                        invalid_ids.append(shape_id)
 
-        if total_area > 0:
-            response.status_code = ShapeService.Code.OK
-            response.message = f"Total area of shapes {total_area} square units."
-            response.total_area = total_area
-            response.valid_ids.extend(valid_ids)
-            response.invalid_ids.extend(invalid_ids)
-        else:
-            response.status_code = ShapeService.Code.AREA_NOT_FOUND
-            response.message = f"Invalid Area: {total_area}."
-            response.invalid_ids.extend(invalid_ids)
+                self.logger.info(f"Total area at {total_area} square units")
 
-        return response
+            if total_area > 0:
+                response.status_code = ShapeService.Code.OK
+                response.message = f"Total area of shapes {total_area} square units."
+                response.total_area = total_area
+                response.valid_ids.extend(valid_ids)
+                response.invalid_ids.extend(invalid_ids)
+            else:
+                response.status_code = ShapeService.Code.AREA_NOT_FOUND
+                response.message = f"Invalid Area: {total_area}."
+                response.invalid_ids.extend(invalid_ids)
+
+            return response
 
     def GetAreas(self, request: Iterator[ShapeService.ShapeId], context) -> Iterator[ShapeService.GetAreasResponse]:
         """
@@ -250,35 +273,40 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         :return: Iterator[ShapeService.GetAreasResponse]
         """
 
-        self.logger.info('GetAreas called with ShapeService.ShapeId iterator')
+        # Extract metadata from context and set the correlation_id so that all logs from this invocation contain
+        # the correlation_id of the call
+        metadata = {key: value for key, value in context.invocation_metadata()}
 
-        for shape_id in request:
-            response: ShapeService.GetAreasResponse = ShapeService.GetAreasResponse(
-                status_code=ShapeService.Code.OK,
-                message=""
-            )
+        with set_correlation_id(metadata['x-correlation-id']):
+            self.logger.info('GetAreas called with ShapeService.ShapeId iterator')
 
-            try:
-                # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
-                # the appropriate error
-                shape: ShapeService.Shape = self.__get_shape_from_id(shape_id.shape_id)
-                area = self.__get_area(shape)
+            for shape_id in request:
+                response: ShapeService.GetAreasResponse = ShapeService.GetAreasResponse(
+                    status_code=ShapeService.Code.OK,
+                    message=""
+                )
 
-                response.status_code = ShapeService.Code.OK
-                response.message = f"{shape.shape_id}: A={area} square units"
-                response.area = area
-                response.shape.CopyFrom(shape)
+                try:
+                    # Attempt to locate the given shape_id, if not found, ShapeService.Code statuses are used to record
+                    # the appropriate error
+                    shape: ShapeService.Shape = self.__get_shape_from_id(shape_id.shape_id)
+                    area = self.__get_area(shape)
 
-                self.logger.info(f"{shape_id.shape_id}: A={area} square units")
-            except LookupError as error:
-                self.logger.error(f"{shape_id.shape_id} not in database")
-                if int(str(error)) == ShapeService.Code.INVALID_SHAPE or int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
-                    response.status_code = ShapeService.Code.AREA_NOT_FOUND
-                    response.message = f"{shape_id.shape_id} does not exist"
+                    response.status_code = ShapeService.Code.OK
+                    response.message = f"{shape.shape_id}: A={area} square units"
+                    response.area = area
+                    response.shape.CopyFrom(shape)
 
-            yield response
+                    self.logger.info(f"{shape_id.shape_id}: A={area} square units")
+                except LookupError as error:
+                    self.logger.error(f"{shape_id.shape_id} not in database")
+                    if int(str(error)) == ShapeService.Code.INVALID_SHAPE or int(str(error)) == ShapeService.Code.SHAPE_NOT_FOUND:
+                        response.status_code = ShapeService.Code.AREA_NOT_FOUND
+                        response.message = f"{shape_id.shape_id} does not exist"
 
-            time.sleep(1)
+                yield response
+
+                time.sleep(1)
 
     def __get_shape_from_id(self, shape_id: str) -> ShapeService.Shape:
         """

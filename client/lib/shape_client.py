@@ -2,6 +2,7 @@ import os
 import grpc
 import json
 import time
+import uuid
 from typing import Iterator, List, Any
 from configparser import ConfigParser
 
@@ -12,9 +13,7 @@ import shape_service_pb2 as ShapeService
 import shape_service_pb2_grpc as ShapeServiceGrpc
 
 # TODO: Make client async
-# TODO: Read config.json in as a file (duh)
 # TODO: Implement Health Check
-# TODO: Implement Deadlines/Timeouts for each method
 # TODO: Look into all the options for the service config file
 # TODO: Look into implementing some sort of connection pooling [Last]
 
@@ -43,20 +42,25 @@ class ShapeClient:
             call_credential
         )
 
-        if os.path.exists(self.db_path):
+        service_config_path: str = config['general']['grpc_client_config']
+        service_config: dict = None
+
+        # Load in the grpc config JSON if it exists, otherwise throw an error
+        if os.path.exists(service_config_path):
             try:
-                with open(self.db_path, 'r') as json_file:
-                    self.data = json.load(json_file)
+                with open(service_config_path, 'r') as config_json:
+                    service_config = json.load(config_json)
             except IOError as e:
                 logger.error(f"Could not load json file: {e}")
+                raise e
         else:
-            self.data = {"Triangles": [], "Rectangles": [], "Pentagons": []}
+            raise ValueError(f"{service_config_path} does not exist")
 
         self.channel = grpc.secure_channel(
             f"{config['general']['grpc_host']}:{config['general']['grpc_port']}",
             credentials=composite_credentials,
             options=[
-                ("shape.service_config", json.dumps(config['general']['grpc_client_config']))
+                ("grpc.service_config", json.dumps(service_config))
             ]
         )
 
@@ -103,17 +107,15 @@ class ShapeClient:
         shape_id = f"{shape_id[0].upper()}-{int(shape_id[2:])}"
 
         try:
-            call_response: tuple[ShapeService.GetShapeResponse, Any] = self.stub.GetShape.with_call(
+            response: ShapeService.GetShapeResponse = self.stub.GetShape(
                 ShapeService.ShapeId(shape_id=shape_id),
                 wait_for_ready=True, # Wait for server to be ready
                 timeout=25, # Manually override the timeout set in the grpc_client_config.json
                 metadata=(
-                    ("x-correlation-id", "TBD"),
+                    ("x-correlation-id", str(uuid.uuid4())),
                     ("x-method-type", "unary-unary")
                 )
             )
-
-            response: ShapeService.GetShapeResponse = call_response[0]
 
             print(f"StatusCode.{ShapeService.Code.Name(response.status_code)} - {response.message}")
 
@@ -149,28 +151,28 @@ class ShapeClient:
         shape_choice = input('Enter the shape you would like to create: ')
         shape_choice = shape_choice.upper()
 
-        call_response: tuple[ShapeService.CreateShapeResponse, Any] = None
+        response: ShapeService.CreateShapeResponse = None
         request_metadata = (
-            ("x-correlation-id", "TBD"),
+            ("x-correlation-id", str(uuid.uuid4())),
             ("x-method-type", "unary-unary")
         )
 
         try:
             if shape_choice == 'T':
-                call_response = self.stub.CreateShape.with_call(
+                response = self.stub.CreateShape(
                     ShapeService.ShapeType(shape_type="Triangle"),
                     wait_for_ready=True,  # Wait for server connection
                     metadata=request_metadata
                 )
             elif shape_choice == 'R':
-                call_response = self.stub.CreateShape.with_call(
-                    ShapeService.ShapeType(shape_type="Triangle"),
+                response = self.stub.CreateShape.with_call(
+                    ShapeService.ShapeType(shape_type="Rectangle"),
                     wait_for_ready=True,  # Wait for server connection
                     metadata=request_metadata
                 )
             elif shape_choice == 'P':
-                call_response = self.stub.CreateShape.with_call(
-                    ShapeService.ShapeType(shape_type="Triangle"),
+                response = self.stub.CreateShape.with_call(
+                    ShapeService.ShapeType(shape_type="Pentagon"),
                     wait_for_ready=True, # Wait for server connection
                     metadata=request_metadata
                 )
@@ -182,8 +184,6 @@ class ShapeClient:
                 print(f"{shape_choice} is an invalid shape. Please choose a valid shape.")
                 print()
                 return
-
-            response: ShapeService.CreateShapeResponse = call_response[0]
 
             print(f"StatusCode.{ShapeService.Code.Name(response.status_code)} - {response.message}")
 
@@ -239,17 +239,15 @@ class ShapeClient:
         id_iterator: Iterator[ShapeService.ShapeId] = self.__get_shape_id_iterator(formatted_ids)
 
         try:
-            call_response: tuple[ShapeService.GetTotalAreaResponse, Any] = self.stub.GetTotalArea.with_call(
+            response: ShapeService.GetTotalAreaResponse = self.stub.GetTotalArea(
                 id_iterator,
                 wait_for_ready=True, # Wait for server availability
                 timeout=10, # Method timeout in seconds
                 metadata=(
-                    ("x-correlation-id", "TBD"),
+                    ("x-correlation-id", str(uuid.uuid4())),
                     ("x-method-type", "stream-unary")
                 )
             )
-
-            response: ShapeService.GetTotalAreaResponse = call_response[0]
 
             print(f"StatusCode.{ShapeService.Code.Name(response.status_code)} - {response.message}")
 
@@ -296,17 +294,16 @@ class ShapeClient:
             return
 
         try:
-            call_response: tuple[Iterator[ShapeService.GetPermitersGreaterThanResponse], Any] = self.stub.GetPerimetersGreaterThan.with_call(
+            response: Iterator[ShapeService.GetPermitersGreaterThanResponse] = self.stub.GetPerimetersGreaterThan(
                 ShapeService.MinPerimeter(min_perimeter=min_perimeter),
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout in seconds
                 metadata=(
-                    ("x-correlation-id", "TBD"),
+                    ("x-correlation-id", str(uuid.uuid4())),
                     ("x-method-type", "unary-stream")
                 )
             )
 
-            response: Iterator[ShapeService.GetPermitersGreaterThanResponse] = call_response[0]
             shapes: List[ShapeService.Shape] = []
 
             # Iterate over the provided responses and handle them appropriately
@@ -369,17 +366,15 @@ class ShapeClient:
         shapes_and_areas: List[tuple] = []
 
         try:
-            call_response: tuple[Iterator[ShapeService.GetAreasResponse], Any] = self.stub.GetAreas.with_call(
+            response: Iterator[ShapeService.GetAreasResponse] = self.stub.GetAreas(
                 id_iterator,
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout
                 metadata=(
-                    ("x-correlation-id", "TBD"),
+                    ("x-correlation-id", str(uuid.uuid4())),
                     ("x-method-type", "stream-stream")
                 )
             )
-
-            response: Iterator[ShapeService.GetAreasResponse] = call_response[0]
 
             for r in response:
                 print(f"StatusCode.{ShapeService.Code.Name(r.status_code)} - {r.message}")

@@ -1,14 +1,15 @@
 import grpc
 import asyncio
+import contextvars
 from concurrent import futures
 
+import context_vars
 from lib.logger import Logger
-from lib.signature_validation_interceptor import SignatureValidationInterceptor
 import lib.functions as helpers
 from lib.shape_server import ShapeServer
 import shape_service_pb2_grpc as ShapeServiceGrpc
+from lib.signature_validation_interceptor import SignatureValidationInterceptor
 
-# TODO: Look into adding correlation-id interceptor to add a correlation-id to the logger
 # TODO: Add HealthChecks
 # TODO: More interceptors?
 
@@ -24,6 +25,7 @@ async def serve(logger, config):
                 sig_value=config['general']['signature_value']
     )
 
+    # When adding interceptors to the server, remember that they are evaluated in the order that they are added
     server = grpc.aio.server(
         futures.ThreadPoolExecutor(max_workers=int(config['general']['max_threads'])),
         interceptors=(
@@ -57,7 +59,9 @@ if __name__ == "__main__":
     # Setup Configuration and Logging
     server_config = helpers.get_config()
 
-    server_logger = Logger(server_config)
+    correlation_id = contextvars.ContextVar('correlation_id', default='')
+
+    server_logger = Logger(server_config, correlation_id)
     helpers.log_config(server_logger, server_config)
 
     # Start Server

@@ -9,15 +9,14 @@ Python gRPC Seed project building out the basic functionality of the different g
 The `proto` package contains the `.proto` file that specifies the service, supported methods,
 and message definitions used in this project.
 
-The way this repository is constructed, once the gRPC python files have been generated, you must go
-into the `SERVICE_NAME_pb2_grpc.py` module and update the import of the `SERVICE_NAME_pb2.py` module
-to be `SERVICE_NAME_pb2.py` so that the imports work properly when used in the `server` and `client` packages
+It also contains `build_grpc.txt` which contains the commands to build the specialized python files
+in the server and client directories if run from the repositories root directory
 
 ## Server
 The `server` package contains `server.py`, the module specifying the creation of an asynchronous
 gRPC server.
 
-The `server/lib` packages contains the module `grpc_server_servicer.py` which is the class definition
+The `server/lib` packages contains the module `shape_server.py` which is the class definition
 of the gRPC service defined in the `.proto` file and is responsible for the implementation of each of
 the support service methods.
 
@@ -28,6 +27,23 @@ this can easily be extended to a database connection, either a server or cloud-b
 The `client` package contains `client.py`, the module specifying a local, console-based client to
 interact with the gRPC server.
 
+### gRPC Client Config
 This client uses `grpc_client_config.json` to specify the client-side configuration of our gRPC
 connection. Specifically, this client includes retries to handle the event of the server not
-being active at the time of the request.
+being active at the time of the request. In the "methodConfig" block of the json configuration, a
+list of configurations is taken, allowing multiple configurations for different services or even
+different methods. 
+
+`"name": [{}]` - Apply configuration to all services and methods
+
+`"name": [ {"service": "Service1"}, {"service": "Service2"}.... ]` - Apply configuration to all methods of the
+listed services
+
+`"name": [{"service": "SERVICE_NAME", "method": "METHOD_NAME"}]` - Apply the configuration to the listed methods
+
+You can also mix specifying services and specific methods for a given configuration such that the name block looks
+like the following:
+
+`"name": [{"service": "Service1", "method": "Method2"}, {"service": "Service2"}]`
+
+which would apply the given configuration to `Service1.Method2` and all the methods of `Service2`
