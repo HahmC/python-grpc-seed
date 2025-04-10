@@ -15,5 +15,8 @@
               },
               "timeout": "15s"
           }
-      ]
+      ],
+      "healthCheckConfig": {
+        "serviceName": "ShapeService"
+      }
   }
