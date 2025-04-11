@@ -3,21 +3,17 @@ import grpc
 import json
 import time
 import uuid
-from grpc_health.v1 import health
 from configparser import ConfigParser
-from typing import Iterator, List, Any
+from typing import Iterator, List
 from grpc_health.v1 import health_pb2 as HealthService
 from grpc_health.v1 import health_pb2_grpc as HealthServiceGrpc
 
-from lib.logger import Logger
-from lib.functions import credentials
-from lib.auth_gateway import AuthGateway
+from .objects.logger import Logger
+from .functions import credentials
+from .gateways.auth_gateway import AuthGateway
 import shape_service_pb2 as ShapeService
 import shape_service_pb2_grpc as ShapeServiceGrpc
 
-
-# TODO: Make client async
-# TODO: Look into implementing some sort of connection pooling [Last]
 
 class ShapeClient:
     """
@@ -30,7 +26,7 @@ class ShapeClient:
         self.server_host: str = config['general']['grpc_host']
         self.server_port: str = config['general']['grpc_port']
 
-        ROOT_CERTIFICATE = credentials._load_credential_from_file(config['general']['root_certificate'])
+        ROOT_CERTIFICATE = credentials.load_credential_from_file(config['general']['root_certificate'])
 
         # Setup gRPC Channel
 
@@ -62,7 +58,7 @@ class ShapeClient:
         else:
             raise ValueError(f"{service_config_path} does not exist")
 
-        self.channel: grpc.Channel = grpc.secure_channel(
+        self.channel: grpc.aio.Channel = grpc.aio.secure_channel(
             f"{self.server_host}:{self.server_port}",
             credentials=self.credentials,
             options=[
@@ -74,7 +70,7 @@ class ShapeClient:
         self.stub: ShapeServiceGrpc.ShapeServiceStub  = ShapeServiceGrpc.ShapeServiceStub(self.channel)
         self.health_stub: HealthServiceGrpc.HealthStub = HealthServiceGrpc.HealthStub(self.channel)
 
-    def get_shape(self):
+    async def get_shape(self):
         """
         Invokes the GetShape gRPC method
 
@@ -115,13 +111,13 @@ class ShapeClient:
 
         # Check service health and do not continue if the server is not healthy
         corr_id: str = str(uuid.uuid4())
-        server_healthy: bool = self.__check_server_health(0, corr_id)
+        server_healthy: bool = await self.__check_server_health(0, corr_id)
         if not server_healthy:
             print("Unable to reach server")
             return
 
         try:
-            response: ShapeService.GetShapeResponse = self.stub.GetShape(
+            response: ShapeService.GetShapeResponse = await self.stub.GetShape(
                 ShapeService.ShapeId(shape_id=shape_id),
                 wait_for_ready=True, # Wait for server to be ready
                 timeout=25, # Manually override the timeout set in the grpc_client_config.json
@@ -152,7 +148,7 @@ class ShapeClient:
             print()
             return
 
-    def create_shape(self):
+    async def create_shape(self):
         """
         Invokes the CreateShape gRPC method
 
@@ -173,26 +169,26 @@ class ShapeClient:
         )
 
         # Check service health and do not continue if the server is not healthy
-        server_healthy: bool = self.__check_server_health(0, corr_id)
+        server_healthy: bool = await self.__check_server_health(0, corr_id)
         if not server_healthy:
             print("Unable to reach server")
             return
 
         try:
             if shape_choice == 'T':
-                response = self.stub.CreateShape(
+                response = await self.stub.CreateShape(
                     ShapeService.ShapeType(shape_type="Triangle"),
                     wait_for_ready=True,  # Wait for server connection
                     metadata=request_metadata
                 )
             elif shape_choice == 'R':
-                response = self.stub.CreateShape.with_call(
+                response = await self.stub.CreateShape(
                     ShapeService.ShapeType(shape_type="Rectangle"),
                     wait_for_ready=True,  # Wait for server connection
                     metadata=request_metadata
                 )
             elif shape_choice == 'P':
-                response = self.stub.CreateShape.with_call(
+                response = await self.stub.CreateShape(
                     ShapeService.ShapeType(shape_type="Pentagon"),
                     wait_for_ready=True, # Wait for server connection
                     metadata=request_metadata
@@ -216,7 +212,7 @@ class ShapeClient:
             print()
             return
 
-    def get_total_area(self):
+    async def get_total_area(self):
         """
         Gets the total area of the provided shape ids
 
@@ -261,13 +257,13 @@ class ShapeClient:
 
         # Check service health and do not continue if the server is not healthy
         corr_id: str = str(uuid.uuid4())
-        server_healthy: bool = self.__check_server_health(0, corr_id)
+        server_healthy: bool = await self.__check_server_health(0, corr_id)
         if not server_healthy:
             print("Unable to reach server")
             return
 
         try:
-            response: ShapeService.GetTotalAreaResponse = self.stub.GetTotalArea(
+            response: ShapeService.GetTotalAreaResponse = await self.stub.GetTotalArea(
                 id_iterator,
                 wait_for_ready=True, # Wait for server availability
                 timeout=10, # Method timeout in seconds
@@ -295,7 +291,7 @@ class ShapeClient:
             print()
             return
 
-    def get_perimeters_greater_than(self):
+    async def get_perimeters_greater_than(self):
         """
         Invokes the GetShape gRPC method
 
@@ -323,13 +319,13 @@ class ShapeClient:
 
         # Check service health and do not continue if the server is not healthy
         corr_id: str = str(uuid.uuid4())
-        server_healthy: bool = self.__check_server_health(0, corr_id)
+        server_healthy: bool = await self.__check_server_health(0, corr_id)
         if not server_healthy:
             print("Unable to reach server")
             return
 
         try:
-            response: Iterator[ShapeService.GetPermitersGreaterThanResponse] = self.stub.GetPerimetersGreaterThan(
+            response: Iterator[ShapeService.GetPermitersGreaterThanResponse] = await self.stub.GetPerimetersGreaterThan(
                 ShapeService.MinPerimeter(min_perimeter=min_perimeter),
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout in seconds
@@ -357,7 +353,7 @@ class ShapeClient:
             print()
             print()
 
-    def get_areas(self):
+    async def get_areas(self):
         """
         Gets the individual area and shape of each of the provided shape_ids
 
@@ -402,13 +398,13 @@ class ShapeClient:
 
         # Check service health and do not continue if the server is not healthy
         corr_id: str = str(uuid.uuid4())
-        server_healthy: bool = self.__check_server_health(0, corr_id)
+        server_healthy: bool = await self.__check_server_health(0, corr_id)
         if not server_healthy:
             print("Unable to reach server")
             return
 
         try:
-            response: Iterator[ShapeService.GetAreasResponse] = self.stub.GetAreas(
+            response: Iterator[ShapeService.GetAreasResponse] = await self.stub.GetAreas(
                 id_iterator,
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout
@@ -432,6 +428,7 @@ class ShapeClient:
             print()
             return
 
+    @staticmethod
     def __get_shape_id_iterator(self, shape_ids: List[str]) -> Iterator[ShapeService.ShapeId]:
         """
         Creates an iterator from the provided list to pass to the grpc server stub
@@ -443,7 +440,7 @@ class ShapeClient:
             yield ShapeService.ShapeId(shape_id=shape_id)
             time.sleep(0.5)  # Add in time-delay so user can see the operation of the iterator server-side
 
-    def __check_server_health(self, hc_counter: int, corr_id: str) -> bool:
+    async def __check_server_health(self, hc_counter: int, corr_id: str) -> bool:
         """
         Checks the health and availability of the server
 
@@ -452,7 +449,7 @@ class ShapeClient:
         request: HealthService.HealthCheckRequest = HealthService.HealthCheckRequest(service="ShapeService")
 
         try:
-            response: HealthService.HealthCheckResponse = self.health_stub.Check(
+            response: HealthService.HealthCheckResponse = await self.health_stub.Check(
                 request,
                 timeout=5,
                 metadata=(
@@ -469,9 +466,9 @@ class ShapeClient:
                 # Reset channel and stubs and increment counter
                 hc_counter  += 1
 
-                self.channel.close()
+                await self.channel.close()
 
-                self.channel: grpc.Channel = grpc.secure_channel(
+                self.channel: grpc.Channel = grpc.aio.secure_channel(
                     f"{self.server_host}:{self.server_port}",
                     credentials=self.credentials,
                     options=[
@@ -482,24 +479,23 @@ class ShapeClient:
                 self.stub: ShapeServiceGrpc.ShapeServiceStub = ShapeServiceGrpc.ShapeServiceStub(self.channel)
                 self.health_stub: HealthServiceGrpc.HealthStub = HealthServiceGrpc.HealthStub(self.channel)
 
-                return self.__check_server_health(hc_counter, corr_id)
+                return await self.__check_server_health(hc_counter, corr_id)
 
             elif hc_counter < self.max_healthcheck_attempts:
                 # Increment Consecutive failed Health Checks and try again
                 hc_counter += 1
-                return self.__check_server_health(hc_counter, corr_id)
+                return await self.__check_server_health(hc_counter, corr_id)
             else:
                 return False
 
-        except grpc.RpcError as e:
+        except grpc.aio.AioRpcError as e:
             if hc_counter < self.max_healthcheck_attempts:
                 if e.code() is grpc.StatusCode.UNAVAILABLE or e.code() is grpc.StatusCode.DEADLINE_EXCEEDED or e.code() is grpc.StatusCode.UNKNOWN:
                     # Increment counter and try again
                     hc_counter += 1
-                    return self.__check_server_health(hc_counter, corr_id)
+                    return await self.__check_server_health(hc_counter, corr_id)
                 else:
                     return False
             else:
-                # Reset counter for next health-check
                 return False
 

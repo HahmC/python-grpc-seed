@@ -1,3 +1,4 @@
-from .logger import *
-from .auth_gateway import *
-from .get_method_choice import *
+from .objects import *
+from .gateways import *
+from .functions import *
+from .shape_client import *

@@ -1,7 +1,7 @@
 import lib.functions as helpers
 from lib.shape_client import ShapeClient
 
-def get_method_choice(methods, client: ShapeClient):
+async def get_method_choice(methods, client: ShapeClient):
     """
     Prompt the user for which gRPC method they would like to run
 
@@ -22,27 +22,27 @@ def get_method_choice(methods, client: ShapeClient):
         print()
         print()
         print("Welcome to CreateShape!")
-        client.create_shape()
+        await client.create_shape()
     elif fxn == 'G':
         print()
         print()
         print("Welcome to GetShape!")
-        client.get_shape()
+        await client.get_shape()
     elif fxn == 'P':
         print()
         print()
         print("Welcome to GetPerimetersGreaterThan!")
-        client.get_perimeters_greater_than()
+        await client.get_perimeters_greater_than()
     elif fxn == 'T':
         print()
         print()
         print("Welcome to GetTotalArea!")
-        client.get_total_area()
+        await client.get_total_area()
     elif fxn == 'A':
         print()
         print()
         print("Welcome to GetAreas!")
-        client.get_areas()
+        await client.get_areas()
     elif fxn == 'E':
         exit()
     else:
@@ -51,9 +51,9 @@ def get_method_choice(methods, client: ShapeClient):
         # Reset to beginning choice
         print()
         print()
-        get_method_choice(methods, client)
+        await get_method_choice(methods, client)
 
     # Loop back to beginning of choice once successfully completing a method
     print()
     print()
-    get_method_choice(methods, client)
+    await get_method_choice(methods, client)

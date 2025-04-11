@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from context_vars import correlation_id
+from lib.objects.context_vars import correlation_id
 
 @contextmanager
 def set_correlation_id(correlation_id_var):

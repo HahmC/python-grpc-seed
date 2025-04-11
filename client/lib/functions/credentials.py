@@ -1,8 +1,7 @@
 import os
 from typing import AnyStr
 
-
-def _load_credential_from_file(filepath: str) -> AnyStr:
+def load_credential_from_file(filepath: str) -> AnyStr:
     """
     Load credentials from the given filepath
 

@@ -1,6 +1,6 @@
 import logging
 import socket
-from context_vars import correlation_id
+from ..objects.context_vars import correlation_id
 
 class Logger(logging.LoggerAdapter):
     """
@@ -11,15 +11,6 @@ class Logger(logging.LoggerAdapter):
             'server_name': socket.gethostname()
         }
         super().__init__(self.__get_logger(config), extra)
-
-    # def process(self, msg: str, kwargs: dict):
-    #     """
-    #     Process the logging message and kwargs to inject the correlation_id
-    #     """
-    #     if 'extra' not in kwargs:
-    #         kwargs['extra'] = {}
-    #     kwargs['extra']['correlation_id'] = correlation_id.get()
-    #     return msg, kwargs
 
     def __get_logger(self, config):
         """

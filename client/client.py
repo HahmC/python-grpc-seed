@@ -1,24 +1,22 @@
-import grpc
-import json
+import asyncio
 
-from lib.logger import Logger
 import lib.functions as helpers
+from lib.objects.logger import Logger
 from lib.shape_client import ShapeClient
-from lib.get_method_choice import get_method_choice
 
-def main(logger, config, methods):
+async def main(logger, config, methods):
     # Create the gRPC channel
     logger.info("Creating gRPC channel...")
 
     client: ShapeClient = ShapeClient(config, logger)
 
     # Create Console App
-    app(methods, client)
+    await app(methods, client)
 
-def app(methods, client: ShapeClient):
+async def app(methods, client: ShapeClient):
     print('Welcome to the gRPC Console Client!')
 
-    get_method_choice(methods, client)
+    await helpers.get_method_choice(methods, client)
 
 if __name__ == "__main__":
     # Setup Configuration and Logging
@@ -28,4 +26,4 @@ if __name__ == "__main__":
     helpers.log_config(client_logger, client_config)
 
     # Start App
-    main(client_logger, client_config, client_config['gRPC_methods'])
+    asyncio.run(main(client_logger, client_config, client_config['gRPC_methods']))

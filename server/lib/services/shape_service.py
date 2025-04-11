@@ -5,10 +5,10 @@ import math
 import random
 from typing import Iterator, List
 
-from .logger import Logger
+from ..objects.logger import Logger
 import shape_service_pb2 as ShapeService
 import shape_service_pb2_grpc as ShapeServiceGrpc
-from correlation_id_context import set_correlation_id
+from ..functions.correlation_id_context import set_correlation_id
 
 class ShapeServer(ShapeServiceGrpc.ShapeService):
     """
@@ -413,7 +413,8 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
 
         return pentagon
 
-    def __get_json_from_shape(self, shape: ShapeService.Shape) -> dict:
+    @staticmethod
+    def __get_json_from_shape(shape: ShapeService.Shape) -> dict:
         """
         Takes a gRCP server Shape and returns a serializable object
 
@@ -438,6 +439,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
 
         return shape_json
 
+    @staticmethod
     def __get_shape_from_json(self, json_shape: dict) -> ShapeService.Shape:
         """
         Takes a JSON object and converts it back to a gRPC Shape
@@ -461,6 +463,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
 
         return shape
 
+    @staticmethod
     def __get_perimeter(self, shape: ShapeService.Shape) -> float:
         """
         Calculates the perimeter of the given shape
@@ -481,6 +484,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
 
         return perimeter
 
+    @staticmethod
     def __get_area(self, shape: ShapeService.Shape) -> float:
         """
         Calculates the area of the given shape using Gauss's Area formula for a polygon
