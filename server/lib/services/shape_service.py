@@ -440,7 +440,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         return shape_json
 
     @staticmethod
-    def __get_shape_from_json(self, json_shape: dict) -> ShapeService.Shape:
+    def __get_shape_from_json(json_shape: dict) -> ShapeService.Shape:
         """
         Takes a JSON object and converts it back to a gRPC Shape
 
@@ -464,7 +464,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         return shape
 
     @staticmethod
-    def __get_perimeter(self, shape: ShapeService.Shape) -> float:
+    def __get_perimeter(shape: ShapeService.Shape) -> float:
         """
         Calculates the perimeter of the given shape
 
@@ -485,7 +485,7 @@ class ShapeServer(ShapeServiceGrpc.ShapeService):
         return perimeter
 
     @staticmethod
-    def __get_area(self, shape: ShapeService.Shape) -> float:
+    def __get_area(shape: ShapeService.Shape) -> float:
         """
         Calculates the area of the given shape using Gauss's Area formula for a polygon
 

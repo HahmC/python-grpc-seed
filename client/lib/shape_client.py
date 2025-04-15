@@ -429,7 +429,7 @@ class ShapeClient:
             return
 
     @staticmethod
-    def __get_shape_id_iterator(self, shape_ids: List[str]) -> Iterator[ShapeService.ShapeId]:
+    def __get_shape_id_iterator(shape_ids: List[str]) -> Iterator[ShapeService.ShapeId]:
         """
         Creates an iterator from the provided list to pass to the grpc server stub
 
