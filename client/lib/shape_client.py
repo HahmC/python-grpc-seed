@@ -325,7 +325,10 @@ class ShapeClient:
             return
 
         try:
-            response: Iterator[ShapeService.GetPermitersGreaterThanResponse] = await self.stub.GetPerimetersGreaterThan(
+            shapes: List[ShapeService.Shape] = []
+
+            # Iterate over the provided responses and handle them appropriately
+            async for r in self.stub.GetPerimetersGreaterThan(
                 ShapeService.MinPerimeter(min_perimeter=min_perimeter),
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout in seconds
@@ -333,12 +336,7 @@ class ShapeClient:
                     ("x-correlation-id", corr_id),
                     ("x-method-type", "unary-stream")
                 )
-            )
-
-            shapes: List[ShapeService.Shape] = []
-
-            # Iterate over the provided responses and handle them appropriately
-            for r in response:
+            ):
                 print(f"StatusCode.{ShapeService.Code.Name(r.status_code)} - {r.message}")
 
                 # Add the shapes to a list of shapes with perimeters above the provided value
@@ -404,7 +402,7 @@ class ShapeClient:
             return
 
         try:
-            response: Iterator[ShapeService.GetAreasResponse] = await self.stub.GetAreas(
+            async for r in self.stub.GetAreas(
                 id_iterator,
                 wait_for_ready=True, # Wait for server connectivity
                 timeout=10, # Method timeout
@@ -412,9 +410,7 @@ class ShapeClient:
                     ("x-correlation-id", corr_id),
                     ("x-method-type", "stream-stream")
                 )
-            )
-
-            for r in response:
+            ):
                 print(f"StatusCode.{ShapeService.Code.Name(r.status_code)} - {r.message}")
 
                 if r.status_code == ShapeService.Code.OK:
